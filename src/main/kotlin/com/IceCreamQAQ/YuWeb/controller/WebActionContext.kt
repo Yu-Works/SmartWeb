@@ -1,18 +1,16 @@
 package com.IceCreamQAQ.YuWeb
 
-import com.IceCreamQAQ.Yu.controller.ActionContext
 import com.IceCreamQAQ.Yu.controller.NewActionContext
-import com.IceCreamQAQ.Yu.entity.Result
 import com.IceCreamQAQ.YuWeb.controller.render.Render
 import com.alibaba.fastjson.JSON
 import java.lang.reflect.InvocationTargetException
 
-class WebActionContext(override var path: Array<String>,val request: H.Request,val response: H.Response) : NewActionContext {
+class WebActionContext(override var path: Array<String>, val request: H.Request, val response: H.Response) : NewActionContext {
 
-    var saves = HashMap<String,Any>()
+    var saves = HashMap<String, Any>()
     var success = false
 
-    var render:Render? = null
+    var render: Render? = null
 
     init {
         saves["context"] = this
@@ -26,22 +24,23 @@ class WebActionContext(override var path: Array<String>,val request: H.Request,v
         saves["response"] = response
     }
 
-    override fun get(name: String): Any?  = saves[name] ?: request.para?.get(name)?.get(0) ?: request.session[name]
+    override fun get(name: String): Any? = saves[name] ?: request.para?.get(name)?.get(0) ?: request.session[name]
     override fun set(name: String, obj: Any) {
         saves[name] = obj
     }
 
-    override fun onError(e: Throwable):Throwable? = when(e){
+    override fun onError(e: Throwable): Throwable? = when (e) {
         is InvocationTargetException -> onError(e.cause!!)
-        is Render ->{
+        is Render -> {
             render = e
             null
         }
         else -> e
     }
 
-    override fun onSuccess(result: Any): Any? {
-        when(result){
+    override fun onSuccess(result: Any?): Any? {
+        if (result == null) return null
+        when (result) {
             is String -> buildResult(result)
             else -> buildResult(result)
         }
@@ -63,7 +62,6 @@ class WebActionContext(override var path: Array<String>,val request: H.Request,v
         response.contentType = "application/json"
         response.body = JSON.toJSONString(obj)
     }
-
 
 
 //    fun getResponse(): H.Response {
