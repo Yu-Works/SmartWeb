@@ -28,12 +28,7 @@ class WebClassTransformer : ClassTransformer {
                 val node = ClassNode()
                 reader.accept(node, 0)
 
-                for (methodNode in node.methods as List<MethodNode>)
-                    if (methodNode.name == "<init>")
-                        for (i in 0 until methodNode.instructions.size())
-                            if (methodNode.instructions[i] is FieldInsnNode)
-                                if ((methodNode.instructions[i] as FieldInsnNode).name == "bannerEnabled")
-                                    methodNode.instructions.set(methodNode.instructions[i - 1], InsnNode(Opcodes.ICONST_0))
+                for (methodNode in node.methods as List<MethodNode>) if (methodNode.name == "<init>") for (i in 0 until methodNode.instructions.size()) if (methodNode.instructions[i] is FieldInsnNode) if ((methodNode.instructions[i] as FieldInsnNode).name == "bannerEnabled") methodNode.instructions.set(methodNode.instructions[i - 1], InsnNode(Opcodes.ICONST_0))
 
                 val cw = ClassWriter(0)
                 node.accept(cw)

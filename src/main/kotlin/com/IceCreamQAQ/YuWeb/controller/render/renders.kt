@@ -22,6 +22,5 @@ class RenderStream(private val inputStream: InputStream) : Render() {
         val bs = ByteArray(l)
         inputStream.read(bs)
         response.outputStream.write(bs)
-//        response.outputStream.w
     }
 }
