@@ -5,8 +5,6 @@ import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.*
-import java.io.File
-import java.io.FileOutputStream
 
 class WebClassTransformer : ClassTransformer {
     override fun transform(bytes: ByteArray, className: String): ByteArray {

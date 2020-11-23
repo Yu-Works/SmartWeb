@@ -1,20 +1,18 @@
 package com.IceCreamQAQ.YuWeb
 
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
-import com.IceCreamQAQ.Yu.controller.router.NewRouter
-import com.IceCreamQAQ.Yu.controller.router.RouterPlus
+import com.IceCreamQAQ.Yu.controller.Router
+import kotlinx.coroutines.runBlocking
 import org.smartboot.http.HttpBootstrap
 import org.smartboot.http.HttpRequest
 import org.smartboot.http.HttpResponse
 import org.smartboot.http.enums.HttpStatus
 import org.smartboot.http.server.handle.HttpHandle
-import java.io.IOException
 import java.io.InputStreamReader
 import java.lang.Exception
-import java.util.*
 import kotlin.collections.HashMap
 
-class WebServer(private val port: Int, private val router: NewRouter, val cache: EhcacheHelp<H.Session>,val createSession:() -> H.Session) {
+class WebServer(private val port: Int, private val router: Router, val cache: EhcacheHelp<H.Session>, val createSession: () -> H.Session) {
 
     private lateinit var bootstrap: HttpBootstrap
 
@@ -79,11 +77,11 @@ class WebServer(private val port: Int, private val router: NewRouter, val cache:
                 resp.outputStream = response.outputStream
 
                 val p = path.substring(1, path.length).split("/")
-                val context = WebActionContext(p.toTypedArray(),req,resp)
+                val context = WebActionContext(p.toTypedArray(), req, resp)
 
 
                 try {
-                    context.success = router.invoke(p[0], context)
+                    context.success = runBlocking { router.invoke(p[0], context) }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     response.httpStatus = HttpStatus.valueOf(500)
@@ -108,7 +106,7 @@ class WebServer(private val port: Int, private val router: NewRouter, val cache:
                         response.addHeader("Set-Cookie", cookie.toCookieString())
                     }
                 }
-                context.render?.doRender(resp)?: response.write(resp.body?.toByteArray())
+                context.render?.doRender(resp) ?: response.write(resp.body?.toByteArray())
 
             }
         } as HttpHandle)
