@@ -2,11 +2,13 @@ package com.IceCreamQAQ.YuWeb
 
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
 import com.IceCreamQAQ.Yu.controller.Router
+import com.IceCreamQAQ.Yu.toJSONObject
 import kotlinx.coroutines.runBlocking
 import org.smartboot.http.HttpBootstrap
 import org.smartboot.http.HttpRequest
 import org.smartboot.http.HttpResponse
 import org.smartboot.http.enums.HttpStatus
+import org.smartboot.http.server.Request
 import org.smartboot.http.server.handle.HttpHandle
 import java.io.InputStreamReader
 import java.lang.Exception
@@ -21,13 +23,40 @@ class WebServer(private val port: Int, private val router: Router, val cache: Eh
         bootstrap.pipeline().next(object : HttpHandle() {
             override fun doHandle(request: HttpRequest, response: HttpResponse) {
 
-                val method = request.method
+                val method = request.method.toLowerCase()
+                if (method != "get" && method != "post") {
+//                    response.
+                    response.httpStatus = HttpStatus.valueOf(405)
+                    return
+                }
+
+
                 val path = request.requestURI
                 val contentType = request.contentType ?: ""
 
                 val cookiesString = request.getHeader("Cookie")
 
-                val req = H.Request(method, path, contentType)
+                val req =
+                        with(request) {
+                            val headers = arrayListOf<H.Header>()
+                            for (name in headerNames) for (header in getHeaders(name)) headers.add(H.Header(name, header))
+
+                            H.Request(
+                                    scheme = scheme,
+                                    method = method,
+                                    path = path,
+                                    url = requestURL,
+
+                                    headers = headers.toTypedArray(),
+                                    userAgent = getHeader("User-Agent"),
+                                    contentType = contentType,
+                                    charset = characterEncoding,
+
+                                    queryString = queryString ?: "",
+
+                                    userAddress = remoteAddress
+                            )
+                        }
 
                 var session: H.Session? = null
                 if (cookiesString != null) {
@@ -55,7 +84,13 @@ class WebServer(private val port: Int, private val router: Router, val cache: Eh
                     response.addHeader("Set-Cookie", session.toCookie().toCookieString())
                 }
 
-                if (method == "POST") {
+//                req.para.putAll(request.parameters)
+                for ((k, v) in request.parameters)
+                    if (v.size == 1) req.para[k] = v[0]
+                    else req.para[k] = v[0]
+
+
+                if (method == "post") {
                     if ("application/json" == contentType) {
                         val bufferSize = 1024
                         val buffer = CharArray(bufferSize)
@@ -67,10 +102,11 @@ class WebServer(private val port: Int, private val router: Router, val cache: Eh
                                 break
                             out.append(buffer, 0, rsz)
                         }
-                        req.body = out.toString()
+                        req.body = out.toString().toJSONObject()
+                        req.para.putAll(req.body!!)
                     }
                 }
-                req.para = request.parameters
+
                 req.session = session
 
                 val resp = H.Response()
@@ -89,6 +125,11 @@ class WebServer(private val port: Int, private val router: Router, val cache: Eh
                 }
                 if (!context.success) {
                     response.httpStatus = HttpStatus.valueOf(404)
+                    return
+                }
+
+                if (context.render == null && resp.body == null) {
+                    response.httpStatus = HttpStatus.valueOf(204)
                     return
                 }
 

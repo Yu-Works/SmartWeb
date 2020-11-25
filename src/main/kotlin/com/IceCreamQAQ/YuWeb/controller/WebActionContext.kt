@@ -3,6 +3,7 @@ package com.IceCreamQAQ.YuWeb
 import com.IceCreamQAQ.Yu.controller.ActionContext
 import com.IceCreamQAQ.YuWeb.controller.render.Render
 import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.util.TypeUtils
 import java.lang.reflect.InvocationTargetException
 
 class WebActionContext(override var path: Array<String>, val request: H.Request, val response: H.Response) : ActionContext {
@@ -24,7 +25,9 @@ class WebActionContext(override var path: Array<String>, val request: H.Request,
         saves["response"] = response
     }
 
-    override fun get(name: String): Any? = saves[name] ?: request.para?.get(name)?.get(0) ?: request.session[name]
+    fun getCookie(name: String): H.Cookie? = request.cookies?.get(name)
+
+    override fun get(name: String): Any? = saves[name] ?: request.para[name] ?: request.session[name]
     override fun set(name: String, obj: Any) {
         saves[name] = obj
     }

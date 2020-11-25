@@ -2,12 +2,13 @@ package com.IceCreamQAQ.YuWeb
 
 import com.IceCreamQAQ.Yu.annotation.After
 import com.IceCreamQAQ.Yu.annotation.Before
-import com.IceCreamQAQ.Yu.controller.DefaultControllerLoaderImpl
-import com.IceCreamQAQ.Yu.controller.RootRouter
-import com.IceCreamQAQ.Yu.controller.Router
+import com.IceCreamQAQ.Yu.controller.*
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.isBean
 import com.IceCreamQAQ.Yu.loader.LoadItem
+import com.IceCreamQAQ.YuWeb.controller.WebActionInvoker
+import com.IceCreamQAQ.YuWeb.controller.WebReflectMethodInvoker
+import java.lang.reflect.Method
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Named
@@ -53,5 +54,10 @@ class WebControllerLoader : DefaultControllerLoaderImpl() {
             this.rootRouters[k] = v.router
         }
     }
+
+    override fun createMethodInvoker(instance: Any, method: Method) = WebReflectMethodInvoker(method, instance)
+
+    override fun createActionInvoker(level: Int, actionMethod: Method, instance: Any) = WebActionInvoker(level, actionMethod, instance)
+
 
 }

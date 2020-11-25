@@ -9,7 +9,7 @@
 
     <groupId>com.IceCreamQAQ.Yu</groupId>
     <artifactId>WebCore</artifactId>
-    <version>0.0.2.0-DEV3</version>
+    <version>0.0.2.0-DEV4</version>
 
     <scm>
         <url>https://github.com/Yu-Works/WebCore</url>
@@ -78,6 +78,9 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <languageVersion>1.4</languageVersion>
+                </configuration>
 
             </plugin>
             <plugin> <!-- 打源码 -->

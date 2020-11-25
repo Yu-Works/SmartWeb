@@ -1,18 +1,46 @@
 package com.IceCreamQAQ.YuWeb
 
+import com.alibaba.fastjson.JSONObject
 import java.io.OutputStream
 import java.lang.StringBuilder
+import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.util.*
 import kotlin.collections.ArrayList
 
 class H {
-    class Request(val method: String, val path: String, val url: String) {
-        lateinit var header: Map<String, String>
+    class Request(
+            val scheme: String,
+            val method: String,
+            val path: String,
+            val url: String,
+
+            val headers: Array<Header>,
+            val userAgent: String,
+            val contentType: String,
+            val charset: String,
+
+            val queryString: String,
+
+            val userAddress: InetSocketAddress,
+    ) {
+        //        lateinit var header: Map<String, String>
         var cookies: Map<String, Cookie>? = null
         lateinit var session: Session
 
-        var body: String? = null
-        var para: Map<String, Array<String>>? = null
+        var body: JSONObject? = null
+        val para = JSONObject()
+
+        fun header(name: String) = headerPrivate(name.toLowerCase())
+        private fun headerPrivate(name: String): Header? {
+            for (header in headers) {
+                if (header.name == name) return header
+            }
+            return null
+        }
+
+        fun headers(name: String) = headersPrivate(name.toLowerCase())
+        private fun headersPrivate(name: String) = headers.filter { name == it.name }
     }
 
     class Response {
@@ -28,6 +56,7 @@ class H {
             if (this.cookies == null) this.cookies = ArrayList()
             this.cookies!!.add(cookie)
         }
+
         fun getCookies(): ArrayList<Cookie>? {
             return cookies
         }
@@ -86,4 +115,6 @@ class H {
             return sc
         }
     }
+
+    data class Header(var name: String, val value: String)
 }
