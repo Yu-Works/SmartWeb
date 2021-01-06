@@ -20,6 +20,7 @@ class WebServer(private val port: Int, private val router: Router, val cache: Eh
 
     fun start() {
         bootstrap = HttpBootstrap()
+        bootstrap.setBannerEnabled(false)
         bootstrap.pipeline().next(object : HttpHandle() {
             override fun doHandle(request: HttpRequest, response: HttpResponse) {
 
@@ -86,8 +87,8 @@ class WebServer(private val port: Int, private val router: Router, val cache: Eh
 
 //                req.para.putAll(request.parameters)
                 for ((k, v) in request.parameters)
-                    if (v.size == 1) req.para[k] = v[0]
-                    else req.para[k] = v[0]
+                    if (v.size == 1) req.para[k.toParaName()] = v[0]
+                    else req.para[k.toParaName()] = v[0]
 
 
                 if (method == "post") {
@@ -121,6 +122,9 @@ class WebServer(private val port: Int, private val router: Router, val cache: Eh
                 } catch (e: Exception) {
                     e.printStackTrace()
                     response.httpStatus = HttpStatus.valueOf(500)
+//                    response.write("<!DOCTYPE html>\n<html><body><div>".toByteArray())
+                    response.write(e.stackTraceToString().replace("\t","    ").replace(" ","&nbsp;").replace("\n","<br>").toByteArray())
+//                    response.write("</div></body></html>".toByteArray())
                     return
                 }
                 if (!context.success) {

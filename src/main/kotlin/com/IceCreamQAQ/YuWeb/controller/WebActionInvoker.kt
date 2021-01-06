@@ -4,10 +4,11 @@ import com.IceCreamQAQ.Yu.controller.ActionContext
 import com.IceCreamQAQ.Yu.controller.DefaultActionInvoker
 import com.IceCreamQAQ.Yu.controller.MethodInvoker
 import com.IceCreamQAQ.Yu.toLowerCaseFirstOne
+import com.IceCreamQAQ.YuWeb.validation.ValidatorFactory
 import java.lang.reflect.Method
 
-class WebActionInvoker(level: Int, method: Method, instance: Any) : DefaultActionInvoker(level, method, instance){
-    override val invoker: MethodInvoker = WebReflectMethodInvoker(method, instance)
+class WebActionInvoker(level: Int, method: Method, instance: Any, factory: ValidatorFactory) : DefaultActionInvoker(level, method, instance) {
+    override val invoker: MethodInvoker = WebReflectMethodInvoker(method, instance, null, factory)
 
     override suspend fun invoke(path: String, context: ActionContext): Boolean {
 //        if (super.invoke(path, context)) return true

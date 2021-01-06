@@ -5,6 +5,10 @@ import com.IceCreamQAQ.Yu.toJSONString
 import com.IceCreamQAQ.YuWeb.H
 import com.IceCreamQAQ.YuWeb.annotation.WebController
 import com.IceCreamQAQ.YuWeb.controller.render.RenderStream
+import com.IceCreamQAQ.YuWeb.validation.Max
+import com.IceCreamQAQ.YuWeb.validation.Min
+import test.TCV
+import test.Test
 import java.io.File
 import java.io.FileInputStream
 import javax.inject.Named
@@ -17,6 +21,21 @@ class Tcp {
 
 @WebController
 class TestController {
+
+    @Action("testStudent")
+    fun testStudent(student: Student) = "你好 ${student.studentName}。"
+
+    @Action("ta")
+    fun tcp(testName: String) = "你好 $testName。"
+
+    @Action("tvn")
+    fun tvn(@Min(50) @Max(100) tn: Long) = "测试数值：$tn。"
+
+    @Action("tcv")
+    fun tcv(tcv: Test) = tcv
+
+    @Action("tda")
+    fun tda(testArray: DoubleArray) = "数组： ${testArray.toList()}。"
 
     @Action("tcp")
     fun tcp(tcp: Tcp) = tcp

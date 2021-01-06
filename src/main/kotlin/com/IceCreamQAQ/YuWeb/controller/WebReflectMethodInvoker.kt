@@ -5,24 +5,31 @@ import com.IceCreamQAQ.Yu.controller.ActionContext
 import com.IceCreamQAQ.Yu.controller.MethodInvoker
 import com.IceCreamQAQ.YuWeb.H
 import com.IceCreamQAQ.YuWeb.WebActionContext
+import com.IceCreamQAQ.YuWeb.toParaName
+import com.IceCreamQAQ.YuWeb.validation.*
 import com.alibaba.fastjson.util.TypeUtils
+import java.lang.RuntimeException
 import java.lang.reflect.Method
-import java.util.stream.Collectors
 import javax.inject.Named
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.callSuspend
 import kotlin.reflect.jvm.kotlinFunction
 
-class WebReflectMethodInvoker(private val method: Method, val instance: Any, level: Int? = null) : MethodInvoker {
+class WebReflectMethodInvoker(private val method: Method, val instance: Any, level: Int? = null, factory: ValidatorFactory) : MethodInvoker {
 
     data class MethodPara(
             val clazz: Class<*>,
+            val name: String,
             val type: Int,
             val data: Any,
             val isArray: Boolean,
             val isSimple: Boolean,
             val cts: (Array<String>.() -> Any?)? = null,
+            val vds: Array<ValidateData>?
     )
+
+    val className = instance::class.java.name
+    val methodName = method.name
 
     private var returnFlag: Boolean = false
     private lateinit var mps: Array<MethodPara>
@@ -50,17 +57,32 @@ class WebReflectMethodInvoker(private val method: Method, val instance: Any, lev
 //            if (para.type == H.Cookie::class.java){
 //
 //            }
+            val vds = arrayListOf<ValidateData>()
+            para.type.getAnnotation(Valid::class.java)?.let { vds.add(ValidateData(it, factory[para.type])) }
+
+            for (annotation in para.annotations) {
+                val vb = annotation::class.java.interfaces[0].getAnnotation(ValidateBy::class.java) ?: continue
+                vds.add(ValidateData(annotation, factory[vb.value]))
+            }
+
+            fun buildMP(
+                    type: Int,
+                    data: Any = name,
+                    isArray: Boolean = false,
+                    isSimple: Boolean = false,
+                    cts: (Array<String>.() -> Any?)? = null
+            ) = MethodPara(para.type, name, type, data, isArray, isSimple, cts, if (vds.size == 0) null else vds.toTypedArray())
 
             mps[i] = when (para.type) {
-                H.Cookie::class.java -> MethodPara(para.type, 1, name, false, false)
-                H.Request::class.java -> MethodPara(para.type, 10, name, false, false)
-                H.Response::class.java -> MethodPara(para.type, 11, name, false, false)
-                H.Session::class.java -> MethodPara(para.type, 12, name, false, false)
+                H.Cookie::class.java -> buildMP(1)
+                H.Request::class.java -> buildMP(10)
+                H.Response::class.java -> buildMP(11)
+                H.Session::class.java -> buildMP(12)
                 ActionContext::class.java,
-                WebActionContext::class.java -> MethodPara(para.type, 15, name, false, false)
+                WebActionContext::class.java -> buildMP(15)
                 else -> {
                     val p = para.type.isSimpleClass()
-                    MethodPara(para.type, 0, name, para.type.isArray, p.first, p.second)
+                    buildMP(0, name.toParaName(), para.type.isArray, p.first, p.second)
                 }
             }
         }
@@ -199,6 +221,11 @@ class WebReflectMethodInvoker(private val method: Method, val instance: Any, lev
                 12 -> context.request.session
                 15 -> context
                 else -> context[mp.data.toString(), mp]
+            }
+            mp.vds?.let {
+                for (vd in it) {
+                    vd.Validator.validate(vd.annotation, p)?.run { throw ValidateFailException(className, methodName, mp.name, this) }
+                }
             }
             paras[i] = p
         }

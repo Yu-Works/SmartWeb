@@ -8,6 +8,7 @@ import com.IceCreamQAQ.Yu.isBean
 import com.IceCreamQAQ.Yu.loader.LoadItem
 import com.IceCreamQAQ.YuWeb.controller.WebActionInvoker
 import com.IceCreamQAQ.YuWeb.controller.WebReflectMethodInvoker
+import com.IceCreamQAQ.YuWeb.validation.ValidatorFactory
 import java.lang.reflect.Method
 import java.util.*
 import javax.inject.Inject
@@ -18,6 +19,9 @@ class WebControllerLoader : DefaultControllerLoaderImpl() {
 
     @Inject
     private lateinit var context: YuContext
+
+    @Inject
+    private lateinit var factory: ValidatorFactory
 
     val rootRouters = HashMap<String, Router>()
 
@@ -55,9 +59,9 @@ class WebControllerLoader : DefaultControllerLoaderImpl() {
         }
     }
 
-    override fun createMethodInvoker(instance: Any, method: Method) = WebReflectMethodInvoker(method, instance)
+    override fun createMethodInvoker(instance: Any, method: Method) = WebReflectMethodInvoker(method, instance, null, factory)
 
-    override fun createActionInvoker(level: Int, actionMethod: Method, instance: Any) = WebActionInvoker(level, actionMethod, instance)
+    override fun createActionInvoker(level: Int, actionMethod: Method, instance: Any) = WebActionInvoker(level, actionMethod, instance, factory)
 
 
 }

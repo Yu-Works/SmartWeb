@@ -32,7 +32,7 @@ class WebActionContext(override var path: Array<String>, val request: H.Request,
         saves[name] = obj
     }
 
-    override fun onError(e: Throwable): Throwable? = when (e) {
+    override suspend fun onError(e: Throwable): Throwable? = when (e) {
         is InvocationTargetException -> onError(e.cause!!)
         is Render -> {
             render = e
@@ -41,7 +41,7 @@ class WebActionContext(override var path: Array<String>, val request: H.Request,
         else -> e
     }
 
-    override fun onSuccess(result: Any?): Any? {
+    override suspend fun onSuccess(result: Any?): Any? {
         if (result == null) return null
         when (result) {
             is String -> buildResult(result)
