@@ -5,27 +5,35 @@ import com.IceCreamQAQ.Yu.controller.ActionContext
 import com.IceCreamQAQ.Yu.controller.MethodInvoker
 import com.IceCreamQAQ.YuWeb.H
 import com.IceCreamQAQ.YuWeb.WebActionContext
+import com.IceCreamQAQ.YuWeb.annotation.RequestBody
+import com.IceCreamQAQ.YuWeb.annotation.RequestParameter
 import com.IceCreamQAQ.YuWeb.toParaName
 import com.IceCreamQAQ.YuWeb.validation.*
 import com.alibaba.fastjson.util.TypeUtils
-import java.lang.RuntimeException
 import java.lang.reflect.Method
 import javax.inject.Named
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.callSuspend
 import kotlin.reflect.jvm.kotlinFunction
 
-class WebReflectMethodInvoker(private val method: Method, val instance: Any, level: Int? = null, factory: ValidatorFactory) : MethodInvoker {
+class WebReflectMethodInvoker(
+    private val method: Method,
+    val instance: Any,
+    level: Int? = null,
+    factory: ValidatorFactory
+) : MethodInvoker {
 
     data class MethodPara(
-            val clazz: Class<*>,
-            val name: String,
-            val type: Int,
-            val data: Any,
-            val isArray: Boolean,
-            val isSimple: Boolean,
-            val cts: (Array<String>.() -> Any?)? = null,
-            val vds: Array<ValidateData>?
+        val clazz: Class<*>,
+        val name: String,
+        val type: Int,
+        val data: Any,
+        val isArray: Boolean,
+        val isSimple: Boolean,
+        var isBody: Boolean,
+        var isPara: Boolean,
+        val cts: (Array<String>.() -> Any?)? = null,
+        val vds: Array<ValidateData>?
     )
 
     val className = instance::class.java.name
@@ -66,12 +74,23 @@ class WebReflectMethodInvoker(private val method: Method, val instance: Any, lev
             }
 
             fun buildMP(
-                    type: Int,
-                    data: Any = name,
-                    isArray: Boolean = false,
-                    isSimple: Boolean = false,
-                    cts: (Array<String>.() -> Any?)? = null
-            ) = MethodPara(para.type, name, type, data, isArray, isSimple, cts, if (vds.size == 0) null else vds.toTypedArray())
+                type: Int,
+                data: Any = name,
+                isArray: Boolean = false,
+                isSimple: Boolean = false,
+                cts: (Array<String>.() -> Any?)? = null
+            ) = MethodPara(
+                para.type,
+                name,
+                type,
+                data,
+                isArray,
+                isSimple,
+                para.type.getAnnotation(RequestBody::class.java) != null,
+                para.type.getAnnotation(RequestParameter::class.java) != null,
+                cts,
+                if (vds.size == 0) null else vds.toTypedArray()
+            )
 
             mps[i] = when (para.type) {
                 H.Cookie::class.java -> buildMP(1)
@@ -224,7 +243,8 @@ class WebReflectMethodInvoker(private val method: Method, val instance: Any, lev
             }
             mp.vds?.let {
                 for (vd in it) {
-                    vd.Validator.validate(vd.annotation, p)?.run { throw ValidateFailException(className, methodName, mp.name, this) }
+                    vd.validator.validate(vd.annotation, p)
+                        ?.run { throw ValidateFailException(className, methodName, mp.name, this) }
                 }
             }
             paras[i] = p
@@ -245,11 +265,16 @@ class WebReflectMethodInvoker(private val method: Method, val instance: Any, lev
 //        return rp.toJavaObject(clazz)
 //    }
 
+    companion object {
+        val reqParaName = arrayOf("req", "request", "paras", "parameters", "body", "reqbody", "requestbody")
+    }
+
     operator fun WebActionContext.get(name: String, mp: MethodPara): Any? {
         val clazz = mp.clazz
         saves[name]?.let { if (clazz.isInstance(it)) return it }
         request.session[name]?.let { if (clazz.isInstance(it)) return it }
         val rp = request.para
+        if (mp.isBody) return rp.toJSONString()
         if (rp.containsKey(name)) {
             var q = rp[name]!!
             if (mp.isArray) {
@@ -264,7 +289,12 @@ class WebReflectMethodInvoker(private val method: Method, val instance: Any, lev
                     if (clazz.isAssignableFrom(q::class.java)) return (q as Array<*>).let { if (it.isNotEmpty()) it[0] else null }
             return TypeUtils.castToJavaBean(q, clazz)
         }
-        return if (!mp.isSimple) rp.toJavaObject(clazz) else null
+        return if (
+            !mp.isPara &&
+            !mp.isSimple &&
+            rp.size > 0 &&
+            (mp.name == mp.clazz.simpleName.toLowerCase() || mp.name in reqParaName)
+        ) rp.toJavaObject(clazz) else null
     }
 
 }

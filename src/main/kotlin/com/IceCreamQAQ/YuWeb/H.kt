@@ -1,28 +1,29 @@
 package com.IceCreamQAQ.YuWeb
 
 import com.alibaba.fastjson.JSONObject
+import org.smartboot.http.server.HttpResponse
+import org.smartboot.http.common.enums.HttpStatus
 import java.io.OutputStream
 import java.lang.StringBuilder
-import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.util.*
 import kotlin.collections.ArrayList
 
 class H {
     class Request(
-            val scheme: String,
-            val method: String,
-            val path: String,
-            val url: String,
+        val scheme: String,
+        val method: String,
+        val path: String,
+        val url: String,
 
-            val headers: Array<Header>,
-            val userAgent: String,
-            val contentType: String,
-            val charset: String,
+        val headers: Array<Header>,
+        val userAgent: String,
+        val contentType: String,
+        val charset: String,
 
-            val queryString: String,
+        val queryString: String,
 
-            val userAddress: InetSocketAddress,
+        val userAddress: InetSocketAddress,
     ) {
         //        lateinit var header: Map<String, String>
         var cookies: Map<String, Cookie>? = null
@@ -43,14 +44,16 @@ class H {
         private fun headersPrivate(name: String) = headers.filter { name == it.name }
     }
 
-    class Response {
-        var header: Map<String, String>? = null
+    abstract class Response {
+        var header: MutableMap<String, String> = hashMapOf()
         private var cookies: ArrayList<Cookie>? = null
-        lateinit var contentType: String
+        var contentType: String = ""
+        var contentLength = -1L
         var body: String? = null
         var charset: String = "UTF-8"
         var status: Int = 200
-        lateinit var outputStream: OutputStream
+        abstract val outputStream: OutputStream
+        var alive = true
 
         fun addCookie(cookie: Cookie) {
             if (this.cookies == null) this.cookies = ArrayList()
@@ -59,6 +62,37 @@ class H {
 
         fun getCookies(): ArrayList<Cookie>? {
             return cookies
+        }
+
+        open fun makeResp() {
+
+        }
+    }
+
+    class SmartHttpResponse(val response: HttpResponse) : Response() {
+        override val outputStream: OutputStream
+            get() {
+                makeResp()
+                alive = false
+                return response.outputStream
+            }
+
+        override fun makeResp() {
+            response.characterEncoding = this.charset
+            response.setContentType(this.contentType)
+
+            val header = this.header
+            for (key in header.keys) {
+                response.addHeader(key, header[key])
+            }
+            val cookies = this.getCookies()
+            if (cookies != null) {
+                for (cookie in cookies.iterator()) {
+                    response.addHeader("Set-Cookie", cookie.toCookieString())
+                }
+            }
+            response.httpStatus = HttpStatus.valueOf(this.status)
+            if (this.contentLength > 0) response.setContentLength(this.contentLength.toInt())
         }
     }
 

@@ -9,7 +9,7 @@
 
     <groupId>com.IceCreamQAQ.Yu</groupId>
     <artifactId>WebCore</artifactId>
-    <version>0.0.2.0-DEV5</version>
+    <version>0.0.2.0-DEV14</version>
 
     <scm>
         <url>https://github.com/Yu-Works/WebCore</url>
@@ -27,8 +27,8 @@
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
         <kotlin.version>1.4.10</kotlin.version>
 
-        <Yu-Core.version>0.2.0.0-DEV7</Yu-Core.version>
-        <smart-http.version>1.0.19</smart-http.version>
+        <Yu-Core.version>0.2.0.0-DEV13</Yu-Core.version>
+        <smart-http.version>1.1.4</smart-http.version>
     </properties>
 
     <dependencies>
@@ -98,6 +98,12 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jetbrains.dokka</groupId>
+                <artifactId>dokka-maven-plugin</artifactId>
+                <version>0.10.1</version>
             </plugin>
         </plugins>
     </build>

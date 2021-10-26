@@ -12,6 +12,6 @@ class WebModule : Module {
     private lateinit var classLoader: ClassLoader
 
     override fun onLoad() {
-        (classLoader as AppClassloader).registerTransformer("com.IceCreamQAQ.Yu.web.WebClassTransformer")
+//        (classLoader as AppClassloader).registerTransformer("com.IceCreamQAQ.Yu.web.WebClassTransformer")
     }
 }

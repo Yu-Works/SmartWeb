@@ -8,7 +8,7 @@ import com.alibaba.fastjson.JSONObject
 data class Student(val studentName:String)
 
 fun main() {
-    AppClassloader.registerBackList(arrayListOf("com.IceCreamQAQ.Yu.web.WebClassTransformer"))
+//    AppClassloader.registerBackList(arrayListOf("com.IceCreamQAQ.Yu.web.WebClassTransformer"))
     DefaultStarter.start()
 
 //    ClassValidatorCreator().spawnClassValidator(test.Test::class.java)

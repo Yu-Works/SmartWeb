@@ -8,3 +8,6 @@ import com.IceCreamQAQ.YuWeb.WebControllerLoader
 @LoadBy(WebControllerLoader::class)
 @EnchantBy(MethodParaNamedEnchanter::class)
 annotation class WebController
+
+annotation class RequestParameter
+annotation class RequestBody

@@ -24,7 +24,7 @@ abstract class ClassValidatorBase @JvmOverloads constructor(factory: ValidatorFa
         reflectValidateData?.let {
             for (data in it) {
                 data.field.isAccessible = true
-                data.Validator.validate(data.annotation, data.field[bean])?.let { result ->
+                data.validator.validate(data.annotation, data.field[bean])?.let { result ->
                     return result
                 }
             }

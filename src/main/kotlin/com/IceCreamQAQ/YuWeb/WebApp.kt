@@ -3,10 +3,12 @@ package com.IceCreamQAQ.YuWeb
 import com.IceCreamQAQ.Yu.`as`.ApplicationService
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
 import com.IceCreamQAQ.Yu.di.ConfigManager
+import com.IceCreamQAQ.Yu.di.ConfigManagerDefaultImpl
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.collections.ArrayList
+import kotlin.properties.ReadOnlyProperty
 
 class WebApp : ApplicationService {
 
@@ -14,11 +16,15 @@ class WebApp : ApplicationService {
     private lateinit var controllerLoader: WebControllerLoader
 
     @Inject
-    private lateinit var configManager: ConfigManager
+    private lateinit var configManager: ConfigManagerDefaultImpl
 
     @Inject
     @field:Named("WebSession")
     private lateinit var sessionCache: EhcacheHelp<H.Session>
+
+//    private inline fun <reified T : Any> inject(name:String = ""): T {
+//
+//    }
 
     override fun init() {
 
@@ -31,7 +37,7 @@ class WebApp : ApplicationService {
         for ((k, v) in rooters) {
             val configName = if (k == "") "webServer.port" else "webServer.$k.port"
             val port = configManager.get(configName, String::class.java)?.toInt()
-                    ?: error("No Server: $k's Port Config!")
+                ?: error("No Server: $k's Port Config!")
             val server = WebServer(port, v, sessionCache) {
                 val sid = UUID.randomUUID().toString()
                 val psId = "${port}_$sid"

@@ -4,24 +4,29 @@ import com.IceCreamQAQ.Yu.cache.EhcacheHelp
 import com.IceCreamQAQ.Yu.controller.Router
 import com.IceCreamQAQ.Yu.toJSONObject
 import kotlinx.coroutines.runBlocking
-import org.smartboot.http.HttpBootstrap
-import org.smartboot.http.HttpRequest
-import org.smartboot.http.HttpResponse
-import org.smartboot.http.enums.HttpStatus
-import org.smartboot.http.server.Request
-import org.smartboot.http.server.handle.HttpHandle
+import org.smartboot.http.server.HttpBootstrap
+import org.smartboot.http.server.HttpRequest
+import org.smartboot.http.server.HttpResponse
+import org.smartboot.http.common.enums.HttpStatus
+import org.smartboot.http.server.HttpServerHandle
 import java.io.InputStreamReader
 import java.lang.Exception
 import kotlin.collections.HashMap
 
-class WebServer(private val port: Int, private val router: Router, val cache: EhcacheHelp<H.Session>, val createSession: () -> H.Session) {
+class WebServer(
+    private val port: Int,
+    private val router: Router,
+    val cache: EhcacheHelp<H.Session>,
+    val createSession: () -> H.Session
+) {
 
     private lateinit var bootstrap: HttpBootstrap
 
     fun start() {
         bootstrap = HttpBootstrap()
-        bootstrap.setBannerEnabled(false)
-        bootstrap.pipeline().next(object : HttpHandle() {
+        bootstrap.configuration().bannerEnabled(false)
+        bootstrap.configuration().threadNum(Runtime.getRuntime().availableProcessors() * 2)
+        bootstrap.pipeline().next(object : HttpServerHandle() {
             override fun doHandle(request: HttpRequest, response: HttpResponse) {
 
                 val method = request.method.toLowerCase()
@@ -38,26 +43,26 @@ class WebServer(private val port: Int, private val router: Router, val cache: Eh
                 val cookiesString = request.getHeader("Cookie")
 
                 val req =
-                        with(request) {
-                            val headers = arrayListOf<H.Header>()
-                            for (name in headerNames) for (header in getHeaders(name)) headers.add(H.Header(name, header))
+                    with(request) {
+                        val headers = arrayListOf<H.Header>()
+                        for (name in headerNames) for (header in getHeaders(name)) headers.add(H.Header(name, header))
 
-                            H.Request(
-                                    scheme = scheme,
-                                    method = method,
-                                    path = path,
-                                    url = requestURL,
+                        H.Request(
+                            scheme = scheme,
+                            method = method,
+                            path = path,
+                            url = requestURL,
 
-                                    headers = headers.toTypedArray(),
-                                    userAgent = getHeader("User-Agent"),
-                                    contentType = contentType,
-                                    charset = characterEncoding,
+                            headers = headers.toTypedArray(),
+                            userAgent = getHeader("User-Agent"),
+                            contentType = contentType,
+                            charset = characterEncoding,
 
-                                    queryString = queryString ?: "",
+                            queryString = queryString ?: "",
 
-                                    userAddress = remoteAddress
-                            )
-                        }
+                            userAddress = remoteAddress
+                        )
+                    }
 
                 var session: H.Session? = null
                 if (cookiesString != null) {
@@ -92,26 +97,33 @@ class WebServer(private val port: Int, private val router: Router, val cache: Eh
 
 
                 if (method == "post") {
-                    if ("application/json" == contentType) {
-                        val bufferSize = 1024
-                        val buffer = CharArray(bufferSize)
-                        val out = StringBuilder()
-                        val input = InputStreamReader(request.inputStream, request.characterEncoding)
-                        while (true) {
-                            val rsz = input.read(buffer, 0, buffer.size)
-                            if (rsz < 0)
-                                break
-                            out.append(buffer, 0, rsz)
+                    val f = contentType.split(";")
+                    var charset = "UTF-8"
+                    for (i in 1 until f.size) {
+                        val s = f[i].trim().split("=")
+                        if (s.size != 2) continue
+                        when (s[0].trim().toLowerCase()) {
+                            "charset" -> charset = s[1].trim()
                         }
-                        req.body = out.toString().toJSONObject()
-                        req.para.putAll(req.body!!)
+                    }
+                    when (f[0].trim()) {
+                        "application/json" -> {
+                            val body = request.readBody(charset)
+                            req.body = body.toJSONObject()
+                            for ((k, v) in req.body!!) req.para[k.toParaName()] = v
+                        }
+                        "application/xml" -> {
+                            val body = request.readBody(charset)
+//                            req.body = body.toJSONObject()
+//                            req.para.putAll(req.body!!)
+                        }
                     }
                 }
 
                 req.session = session
 
-                val resp = H.Response()
-                resp.outputStream = response.outputStream
+                val resp = H.SmartHttpResponse(response)
+//                resp.outputStream = response.outputStream
 
                 val p = path.substring(1, path.length).split("/")
                 val context = WebActionContext(p.toTypedArray(), req, resp)
@@ -123,7 +135,10 @@ class WebServer(private val port: Int, private val router: Router, val cache: Eh
                     e.printStackTrace()
                     response.httpStatus = HttpStatus.valueOf(500)
 //                    response.write("<!DOCTYPE html>\n<html><body><div>".toByteArray())
-                    response.write(e.stackTraceToString().replace("\t","    ").replace(" ","&nbsp;").replace("\n","<br>").toByteArray())
+                    response.write(
+                        e.stackTraceToString().replace("\t", "    ").replace(" ", "&nbsp;").replace("\n", "<br>")
+                            .toByteArray()
+                    )
 //                    response.write("</div></body></html>".toByteArray())
                     return
                 }
@@ -137,25 +152,26 @@ class WebServer(private val port: Int, private val router: Router, val cache: Eh
                     return
                 }
 
-                response.characterEncoding = resp.charset
-                response.setContentType(resp.contentType)
-                val header = resp.header
-                if (header != null) {
-                    for (key in header.keys) {
-                        response.addHeader(key, header[key])
-                    }
-                }
-                val cookies = resp.getCookies()
-                if (cookies != null) {
-                    for (cookie in cookies.iterator()) {
-                        response.addHeader("Set-Cookie", cookie.toCookieString())
-                    }
-                }
                 context.render?.doRender(resp) ?: response.write(resp.body?.toByteArray())
 
+                if (resp.alive) resp.makeResp()
             }
-        } as HttpHandle)
+        })
         bootstrap.setPort(port).start()
+    }
+
+    fun HttpRequest.readBody(charset: String): String {
+        val bufferSize = 1024
+        val buffer = CharArray(bufferSize)
+        val out = StringBuilder()
+        val input = InputStreamReader(inputStream, charset)
+        while (true) {
+            val rsz = input.read(buffer, 0, buffer.size)
+            if (rsz < 0)
+                break
+            out.append(buffer, 0, rsz)
+        }
+        return out.toString()
     }
 
     fun stop() {

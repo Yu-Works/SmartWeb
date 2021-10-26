@@ -48,7 +48,7 @@ class ClassValidatorCreator {
             }
 
             annotation@ for (annotation in field.annotations) {
-                /*val vb = */annotation::class.java.interfaces[0].getAnnotation(ValidateBy::class.java) ?: continue
+                /*val vb = */annotation::class.java.interfaces[0].getAnnotation(ValidateBy::class.java) ?: continue@annotation
                 val ac = annotation::class.java.interfaces[0]
                 val acn = ac.name.replace(".", "_")
                 val vdn = "${field.name}${acn}vd"
