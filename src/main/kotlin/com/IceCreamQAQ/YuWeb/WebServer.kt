@@ -24,6 +24,9 @@ class WebServer(
     val cors: Boolean
     val corsDomain: Array<String>
 
+    val isDev = file("pom.xml", "build.gradle", "build.gradle.kts") != null
+
+
     init {
         cors = corsStr != null
         corsDomain =
@@ -162,7 +165,7 @@ class WebServer(
                     e.printStackTrace()
                     response.httpStatus = HttpStatus.valueOf(500)
 //                    response.write("<!DOCTYPE html>\n<html><body><div>".toByteArray())
-                    response.write(
+                    if (isDev) response.write(
                         e.stackTraceToString().replace("\t", "    ").replace(" ", "&nbsp;").replace("\n", "<br>")
                             .toByteArray()
                     )
