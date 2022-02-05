@@ -22,6 +22,7 @@ class Tcp {
 }
 
 data class Entity1(val id: Int, val name: String)
+
 @Valid
 data class Entity2(
     val id: Int,
@@ -29,15 +30,20 @@ data class Entity2(
     @field:Max(150)
     val height: Int
 )
-annotation class Permission(val value:String)
+
+annotation class Permission(val value: String)
+
 @WebController
 class TestController {
 
+    @Action("tpv/{pv}")
+    fun testPathVar(pv: Int?) = pv
+
     @Action("2entity")
     @Permission("user.test")
-    fun entityTest(entity1: Entity1,entity2: Entity2) = arrayListOf(entity1,entity2)
+    fun entityTest(entity1: Entity1, entity2: Entity2) = arrayListOf(entity1, entity2)
 
-//    @Action("testStudent")
+    //    @Action("testStudent")
 //    fun testStudent(student: Student) = "你好 ${student.studentName}。"
 //
 //    @Action("ta")

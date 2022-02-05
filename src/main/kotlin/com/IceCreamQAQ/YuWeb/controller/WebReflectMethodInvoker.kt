@@ -271,7 +271,21 @@ class WebReflectMethodInvoker(
 
     operator fun WebActionContext.get(name: String, mp: MethodPara): Any? {
         val clazz = mp.clazz
-        saves[name]?.let { if (clazz.isInstance(it)) return it }
+        saves[name]?.let {
+            if (clazz.isInstance(it)) return it
+            if (it is String) {
+                when (clazz) {
+                    Boolean::class.java, Boolean::class.javaObjectType -> return it.toBoolean()
+                    Byte::class.java, Byte::class.javaObjectType -> return it.toByte()
+                    Short::class.java, Short::class.javaObjectType -> return it.toShort()
+                    Int::class.java, Int::class.javaObjectType -> return it.toInt()
+                    Long::class.java, Long::class.javaObjectType -> return it.toLong()
+                    Char::class.java, Char::class.javaObjectType -> return it[0]
+                    Float::class.java, Float::class.javaObjectType -> return it.toFloat()
+                    Double::class.java, Double::class.javaObjectType -> return it.toDouble()
+                }
+            }
+        }
         request.session[name]?.let { if (clazz.isInstance(it)) return it }
         val rp = request.para
         if (mp.isBody) return rp.toJSONString()
