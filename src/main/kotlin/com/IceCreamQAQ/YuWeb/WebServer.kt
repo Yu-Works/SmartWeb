@@ -20,6 +20,11 @@ class WebServer(
     val createSession: () -> H.Session
 ) {
 
+    companion object {
+        var jsonDecoder: WebActionContext.(String) -> String = { it }
+        var jsonEncoder: WebActionContext.(String) -> String = { it }
+    }
+
     private lateinit var bootstrap: HttpBootstrap
 
     fun start() {
@@ -54,7 +59,7 @@ class WebServer(
                             url = requestURL,
 
                             headers = headers.toTypedArray(),
-                            userAgent = getHeader("User-Agent"),
+                            userAgent = getHeader("User-Agent") ?: "",
                             contentType = contentType,
                             charset = characterEncoding,
 
@@ -95,6 +100,13 @@ class WebServer(
                     if (v.size == 1) req.para[k.toParaName()] = v[0]
                     else req.para[k.toParaName()] = v[0]
 
+                req.session = session
+
+                val resp = H.SmartHttpResponse(response)
+//                resp.outputStream = response.outputStream
+
+                val p = path.substring(1, path.length).split("/")
+                val context = WebActionContext(p.toTypedArray(), req, resp)
 
                 if (method == "post") {
                     val f = contentType.split(";")
@@ -108,7 +120,7 @@ class WebServer(
                     }
                     when (f[0].trim()) {
                         "application/json" -> {
-                            val body = request.readBody(charset)
+                            val body = jsonDecoder(context, request.readBody(charset))
                             req.body = body.toJSONObject()
                             for ((k, v) in req.body!!) req.para[k.toParaName()] = v
                         }
@@ -119,15 +131,6 @@ class WebServer(
                         }
                     }
                 }
-
-                req.session = session
-
-                val resp = H.SmartHttpResponse(response)
-//                resp.outputStream = response.outputStream
-
-                val p = path.substring(1, path.length).split("/")
-                val context = WebActionContext(p.toTypedArray(), req, resp)
-
 
                 try {
                     context.success = runBlocking { router.invoke(p[0], context) }
@@ -152,7 +155,14 @@ class WebServer(
                     return
                 }
 
-                context.render?.doRender(resp) ?: response.write(resp.body?.toByteArray())
+                if (context.render != null) {
+                    context.render!!.doRender(resp)
+                } else {
+                    val ba = resp.body?.toByteArray() ?: byteArrayOf()
+                    resp.contentLength = ba.size.toLong()
+                    resp.makeResp()
+                    response.write(ba)
+                }
 
                 if (resp.alive) resp.makeResp()
             }

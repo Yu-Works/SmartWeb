@@ -29,11 +29,12 @@ data class Entity2(
     @field:Max(150)
     val height: Int
 )
-
+annotation class Permission(val value:String)
 @WebController
 class TestController {
 
     @Action("2entity")
+    @Permission("user.test")
     fun entityTest(entity1: Entity1,entity2: Entity2) = arrayListOf(entity1,entity2)
 
 //    @Action("testStudent")
@@ -42,8 +43,8 @@ class TestController {
 //    @Action("ta")
 //    fun tcp(testName: String) = "你好 $testName。"
 //
-//    @Action("tvn")
-//    fun tvn(@Min(50) @Max(100) tn: Long) = "测试数值：$tn。"
+    @Action("tvn")
+    fun tvn(@Min(50) @Max(100) tn: Long) = "测试数值：$tn。"
 //
 ////    @Action("tcv")
 ////    fun tcv(tcv: Test) = tcv

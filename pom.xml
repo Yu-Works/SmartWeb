@@ -9,7 +9,7 @@
 
     <groupId>com.IceCreamQAQ.Yu</groupId>
     <artifactId>WebCore</artifactId>
-    <version>0.0.2.0-DEV14</version>
+    <version>0.0.2.0-DEV17</version>
 
     <scm>
         <url>https://github.com/Yu-Works/WebCore</url>

@@ -70,7 +70,7 @@ class NotNullValidator : Validator {
 }
 
 @ValidateBy(MinValidator::class)
-@Target(AnnotationTarget.FIELD,AnnotationTarget.PROPERTY)
+@Target(AnnotationTarget.FIELD,AnnotationTarget.PROPERTY, AnnotationTarget.VALUE_PARAMETER)
 annotation class Min(
         val value: Long,
         val canEqual: Boolean = false,

@@ -7,6 +7,7 @@ import com.IceCreamQAQ.Yu.toLowerCaseFirstOne
 import com.IceCreamQAQ.YuWeb.validation.ValidatorFactory
 import java.lang.reflect.Method
 
+
 class WebActionInvoker(level: Int, method: Method, instance: Any, val factory: ValidatorFactory) :
     DefaultActionInvoker(level, method, instance) {
 //    override val invoker: MethodInvoker = WebReflectMethodInvoker(method, instance, null, factory)
@@ -17,20 +18,12 @@ class WebActionInvoker(level: Int, method: Method, instance: Any, val factory: V
     override suspend fun invoke(path: String, context: ActionContext): Boolean {
 //        if (super.invoke(path, context)) return true
         try {
-//            for (before in globalBefores) {
-//                val o = before.invoke(context)
-//                if (o != null) context[o::class.java.simpleName.toLowerCaseFirstOne()] = o
-//            }
             for (before in befores) {
                 val o = before.invoke(context)
                 if (o != null) context[o::class.java.simpleName.toLowerCaseFirstOne()] = o
             }
             val result = invoker.invoke(context)
             context.onSuccess(result)
-//            for (after in globalAfters) {
-//                val o = after.invoke(context)
-//                if (o != null) context[o::class.java.simpleName.toLowerCaseFirstOne()] = o
-//            }
             for (after in afters) {
                 val o = after.invoke(context)
                 if (o != null) context[o::class.java.simpleName.toLowerCaseFirstOne()] = o
@@ -39,10 +32,6 @@ class WebActionInvoker(level: Int, method: Method, instance: Any, val factory: V
             val er = context.onError(e) ?: return true
             context["exception"] = er
             try {
-//                for (catch in globalCatchs) {
-//                    val o = catch.invoke(context, er)
-//                    if (o != null) context[o::class.java.simpleName.toLowerCaseFirstOne()] = o
-//                }
                 for (catch in catchs) {
                     val o = catch.invoke(context, er)
                     if (o != null) context[o::class.java.simpleName.toLowerCaseFirstOne()] = o

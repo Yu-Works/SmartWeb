@@ -39,3 +39,5 @@ import org.objectweb.asm.tree.*
 //    }
 
 //}
+
+class ActionResult(val result: Any) : RuntimeException()
