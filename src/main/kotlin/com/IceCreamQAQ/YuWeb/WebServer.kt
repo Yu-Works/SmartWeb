@@ -15,10 +15,21 @@ import kotlin.collections.HashMap
 
 class WebServer(
     private val port: Int,
+    corsStr: String?,
     private val router: Router,
     val cache: EhcacheHelp<H.Session>,
     val createSession: () -> H.Session
 ) {
+
+    val cors: Boolean
+    val corsDomain: Array<String>
+
+    init {
+        cors = corsStr != null
+        corsDomain =
+            if (cors) corsStr!!.split(",").map { it.trim() }.toTypedArray()
+            else arrayOf()
+    }
 
     companion object {
         var jsonDecoder: WebActionContext.(String) -> String = { it }
@@ -35,6 +46,19 @@ class WebServer(
             override fun doHandle(request: HttpRequest, response: HttpResponse) {
 
                 val method = request.method.toLowerCase()
+
+                val origin = request.getHeader("Origin")
+
+                if (origin != null) {
+                    if (!cors) return
+                    if (origin !in corsDomain) return
+
+                    response.setHeader("Access-Control-Allow-Origin", origin)
+                    response.setHeader("Access-Control-Allow-Headers", "*")
+                    response.setHeader("Access-Control-Allow-Method", "GET,POST,OPTIONS")
+                    if (method == "options") return
+                }
+
                 if (method != "get" && method != "post") {
 //                    response.
                     response.httpStatus = HttpStatus.valueOf(405)

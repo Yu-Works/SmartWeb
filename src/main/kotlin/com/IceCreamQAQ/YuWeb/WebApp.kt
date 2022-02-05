@@ -36,9 +36,13 @@ class WebApp : ApplicationService {
 
         for ((k, v) in rooters) {
             val configName = if (k == "") "webServer.port" else "webServer.$k.port"
-            val port = configManager.get(configName, String::class.java)?.toInt()
-                ?: error("No Server: $k's Port Config!")
-            val server = WebServer(port, v, sessionCache) {
+            val corsName = if (k == "") "webServer.cors" else "webServer.$k.cors"
+
+            val port =
+                configManager.get(configName, String::class.java)?.toInt() ?: error("No Server: $k's Port Config!")
+            val cors = configManager.get(corsName, String::class.java)
+
+            val server = WebServer(port, cors, v, sessionCache) {
                 val sid = UUID.randomUUID().toString()
                 val psId = "${port}_$sid"
                 val session = H.Session(psId, HashMap())
