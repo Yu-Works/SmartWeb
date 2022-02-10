@@ -40,6 +40,7 @@ class WebServer(
     }
 
     private lateinit var bootstrap: HttpBootstrap
+    val enableMethod = arrayOf("get", "post", "put", "delete")
 
     fun start() {
         bootstrap = HttpBootstrap()
@@ -62,7 +63,7 @@ class WebServer(
                     if (method == "options") return
                 }
 
-                if (method != "get" && method != "post") {
+                if (method !in enableMethod) {
 //                    response.
                     response.httpStatus = HttpStatus.valueOf(405)
                     return
@@ -135,7 +136,7 @@ class WebServer(
                 val p = path.substring(1, path.length).split("/")
                 val context = WebActionContext(p.toTypedArray(), req, resp)
 
-                if (method == "post") {
+                if (method != "get") {
                     val f = contentType.split(";")
                     var charset = "UTF-8"
                     for (i in 1 until f.size) {
