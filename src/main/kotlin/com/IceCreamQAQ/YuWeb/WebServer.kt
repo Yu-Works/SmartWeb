@@ -59,7 +59,7 @@ class WebServer(
 
                     response.setHeader("Access-Control-Allow-Origin", origin)
                     response.setHeader("Access-Control-Allow-Headers", "*")
-                    response.setHeader("Access-Control-Allow-Method", "GET,POST,OPTIONS")
+                    response.setHeader("Access-Control-Allow-Method", "GET,POST,OPTIONS,PUT,DELETE")
                     if (method == "options") return
                 }
 
