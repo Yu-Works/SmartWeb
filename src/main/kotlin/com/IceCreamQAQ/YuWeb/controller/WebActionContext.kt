@@ -2,6 +2,7 @@ package com.IceCreamQAQ.YuWeb
 
 import com.IceCreamQAQ.Yu.controller.ActionContext
 import com.IceCreamQAQ.Yu.web.ActionResult
+import com.IceCreamQAQ.YuWeb.controller.WebActionInvoker
 import com.IceCreamQAQ.YuWeb.controller.render.Render
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.util.TypeUtils
@@ -15,6 +16,8 @@ class WebActionContext(
 
     var saves = HashMap<String, Any>()
     var success = false
+
+    lateinit var invoker: WebActionInvoker
 
     var render: Render? = null
 

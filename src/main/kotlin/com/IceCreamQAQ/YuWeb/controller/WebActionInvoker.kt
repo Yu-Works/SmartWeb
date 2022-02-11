@@ -4,6 +4,7 @@ import com.IceCreamQAQ.Yu.controller.ActionContext
 import com.IceCreamQAQ.Yu.controller.DefaultActionInvoker
 import com.IceCreamQAQ.Yu.controller.MethodInvoker
 import com.IceCreamQAQ.Yu.toLowerCaseFirstOne
+import com.IceCreamQAQ.YuWeb.WebActionContext
 import com.IceCreamQAQ.YuWeb.validation.ValidatorFactory
 import java.lang.reflect.Method
 
@@ -18,6 +19,8 @@ class WebActionInvoker(level: Int, method: Method, instance: Any, val factory: V
     override suspend fun invoke(path: String, context: ActionContext): Boolean {
 //        if (super.invoke(path, context)) return true
         try {
+            context as WebActionContext
+            context.invoker = this
             for (before in befores) {
                 val o = before.invoke(context)
                 if (o != null) context[o::class.java.simpleName.toLowerCaseFirstOne()] = o
