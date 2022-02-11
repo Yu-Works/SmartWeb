@@ -7,8 +7,11 @@ import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.util.TypeUtils
 import java.lang.reflect.InvocationTargetException
 
-class WebActionContext(override var path: Array<String>, val request: H.Request, val response: H.Response) :
-    ActionContext {
+class WebActionContext(
+    override var path: Array<String>,
+    val request: H.Request,
+    val response: H.Response
+) : ActionContext {
 
     var saves = HashMap<String, Any>()
     var success = false
