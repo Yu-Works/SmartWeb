@@ -18,7 +18,7 @@ class WebActionContext(
 
     lateinit var invoker: WebActionInvoker
 
-    var render: Render? = null
+    var result: Any? = null
 
     init {
         saves["context"] = this
@@ -42,39 +42,21 @@ class WebActionContext(
     override suspend fun onError(e: Throwable): Throwable? = when (e) {
         is InvocationTargetException -> onError(e.cause!!)
         is Render -> {
-            render = e
+            result = e
             null
         }
         is ActionResult -> {
-            buildResult(e.result)
+            result = e.result
             null
         }
         else -> e
     }
 
     override suspend fun onSuccess(result: Any?): Any? {
-        if (result == null) return null
-        when (result) {
-            is String -> buildResult(result)
-            else -> buildResult(result)
-        }
+        this.result = result
         return null
     }
 
-    private fun buildResult(text: String) {
-        when {
-            text.startsWith("{") || text.startsWith("[") -> response.contentType = "application/json"
-            text.startsWith("<?xml") -> response.contentType = "application/xml"
-            text.startsWith("<") -> response.contentType = "text/html"
-            else -> response.contentType = "text/plain"
-        }
 
-        response.body = text
-    }
-
-    private fun buildResult(obj: Any?) {
-        response.contentType = "application/json"
-        response.body = WebServer.jsonEncoder(this, JSON.toJSONString(obj))
-    }
 
 }

@@ -3,6 +3,8 @@ package com.IceCreamQAQ.YuWeb
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
 import com.IceCreamQAQ.Yu.controller.Router
 import com.IceCreamQAQ.Yu.toJSONObject
+import com.IceCreamQAQ.YuWeb.controller.render.Render
+import com.alibaba.fastjson.JSON
 import kotlinx.coroutines.runBlocking
 import org.smartboot.http.server.HttpBootstrap
 import org.smartboot.http.server.HttpRequest
@@ -173,29 +175,55 @@ class WebServer(
 //                    response.write("</div></body></html>".toByteArray())
                     return
                 }
+                fun statusCode(code: Int) {
+                    response.httpStatus = HttpStatus.valueOf(404)
+                }
                 if (!context.success) {
                     response.httpStatus = HttpStatus.valueOf(404)
                     return
                 }
 
-                if (context.render == null && resp.body == null) {
-                    response.httpStatus = HttpStatus.valueOf(204)
-                    return
-                }
+                val result = context.result
 
-                if (context.render != null) {
-                    context.render!!.doRender(resp)
-                } else {
+                if (result == null && method == "post") return statusCode(201)
+                if (result == null) return statusCode(204)
+
+                if (result is Render) result.doRender(resp)
+                else {
+                    context.buildResult(result)
                     val ba = resp.body?.toByteArray() ?: byteArrayOf()
                     resp.contentLength = ba.size.toLong()
                     resp.makeResp()
                     response.write(ba)
                 }
 
+//                if (context.render != null) {
+//                    context.render!!.doRender(resp)
+//                } else {
+//
+//                }
+
                 if (resp.alive) resp.makeResp()
             }
         })
         bootstrap.setPort(port).start()
+    }
+
+
+    private fun WebActionContext.buildResult(text: String) {
+        when {
+            text.startsWith("{") || text.startsWith("[") -> response.contentType = "application/json"
+            text.startsWith("<?xml") -> response.contentType = "application/xml"
+            text.startsWith("<") -> response.contentType = "text/html"
+            else -> response.contentType = "text/plain"
+        }
+
+        response.body = text
+    }
+
+    private fun WebActionContext.buildResult(obj: Any?) {
+        response.contentType = "application/json"
+        response.body = jsonEncoder(this, JSON.toJSONString(obj))
     }
 
     fun HttpRequest.readBody(charset: String): String {
