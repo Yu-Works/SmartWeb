@@ -2,7 +2,6 @@ package com.IceCreamQAQ.YuWeb.controller
 
 import com.IceCreamQAQ.Yu.controller.ActionContext
 import com.IceCreamQAQ.Yu.controller.DefaultActionInvoker
-import com.IceCreamQAQ.Yu.controller.MethodInvoker
 import com.IceCreamQAQ.Yu.toLowerCaseFirstOne
 import com.IceCreamQAQ.YuWeb.WebActionContext
 import com.IceCreamQAQ.YuWeb.validation.ValidatorFactory
