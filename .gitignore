@@ -1,5 +1,9 @@
-/log/**
-/tmp/**
-
-target
 .idea
+*.iml
+
+.gradle
+/build
+/target
+
+/tmp
+/log
