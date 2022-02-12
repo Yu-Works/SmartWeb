@@ -231,6 +231,7 @@ class WebServer(
             is String -> makeStringHeader(obj).let { resultByString(it.first, it.second) }
             is Byte -> resultByByteArray(byteArrayOf(obj))
             is ByteArray -> resultByByteArray(obj)
+            is InputStream -> resultByInputStream(obj)
             else -> resultByString(jsonEncoder(this, JSON.toJSONString(obj)), "application/json")
         }
     }
