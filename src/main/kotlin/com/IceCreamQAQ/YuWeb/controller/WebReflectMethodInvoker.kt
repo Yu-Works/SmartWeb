@@ -54,7 +54,7 @@ class WebReflectMethodInvoker(
         val action = method.getAnnotation(Action::class.java)
         val isAction = action != null && level != null
         val actionPaths = action?.value?.split(" ", "/")
-        val needMatch = (actionPaths?.size ?: 0 > 1) && isAction
+        val needMatch = ((actionPaths?.size ?: 0) > 1) && isAction
         val l = if (needMatch) level!! - actionPaths!!.size - 1 else 0
 
         for ((i, para) in paras.withIndex()) {
