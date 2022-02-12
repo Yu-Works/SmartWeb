@@ -43,6 +43,9 @@ class TestController {
     @Permission("user.test")
     fun entityTest(entity1: Entity1, entity2: Entity2) = arrayListOf(entity1, entity2)
 
+    @Action("testDownload")
+    fun testDownload() = File("pom.xml")
+
     //    @Action("testStudent")
 //    fun testStudent(student: Student) = "你好 ${student.studentName}。"
 //

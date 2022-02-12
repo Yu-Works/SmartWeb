@@ -12,6 +12,8 @@ import org.smartboot.http.server.HttpResponse
 import org.smartboot.http.common.enums.HttpStatus
 import org.smartboot.http.server.HttpServerHandle
 import sun.security.util.Length
+import java.io.File
+import java.io.FileInputStream
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.lang.Exception
@@ -232,6 +234,10 @@ class WebServer(
             is Byte -> resultByByteArray(byteArrayOf(obj))
             is ByteArray -> resultByByteArray(obj)
             is InputStream -> resultByInputStream(obj)
+            is File -> {
+                response.header["Content-Disposition"] = "filename=\"${obj.name}\""
+                resultByInputStream(FileInputStream(obj), "application/octet-stream", obj.length())
+            }
             else -> resultByString(jsonEncoder(this, JSON.toJSONString(obj)), "application/json")
         }
     }
