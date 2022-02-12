@@ -11,6 +11,8 @@ import org.smartboot.http.server.HttpRequest
 import org.smartboot.http.server.HttpResponse
 import org.smartboot.http.common.enums.HttpStatus
 import org.smartboot.http.server.HttpServerHandle
+import sun.security.util.Length
+import java.io.InputStream
 import java.io.InputStreamReader
 import java.lang.Exception
 import kotlin.collections.HashMap
@@ -176,7 +178,7 @@ class WebServer(
                     return
                 }
                 fun statusCode(code: Int) {
-                    response.httpStatus = HttpStatus.valueOf(404)
+                    response.httpStatus = HttpStatus.valueOf(code)
                 }
                 if (!context.success) {
                     response.httpStatus = HttpStatus.valueOf(404)
@@ -189,13 +191,7 @@ class WebServer(
                 if (result == null) return statusCode(204)
 
                 if (result is Render) result.doRender(resp)
-                else {
-                    context.buildResult(result)
-                    val ba = resp.body?.toByteArray() ?: byteArrayOf()
-                    resp.contentLength = ba.size.toLong()
-                    resp.makeResp()
-                    response.write(ba)
-                }
+                else context.buildResult(result)
 
 //                if (context.render != null) {
 //                    context.render!!.doRender(resp)
@@ -210,20 +206,39 @@ class WebServer(
     }
 
 
-    private fun WebActionContext.buildResult(text: String) {
+    private fun WebActionContext.makeStringHeader(text: String) =
         when {
-            text.startsWith("{") || text.startsWith("[") -> response.contentType = "application/json"
-            text.startsWith("<?xml") -> response.contentType = "application/xml"
-            text.startsWith("<") -> response.contentType = "text/html"
-            else -> response.contentType = "text/plain"
+            text.startsWith("{") || text.startsWith("[") -> jsonEncoder(text) to "application/json"
+            text.startsWith("<?xml") -> text to "application/xml"
+            text.startsWith("<") -> text to "text/html"
+            else -> text to "text/plain"
         }
 
-        response.body = text
+
+    private fun WebActionContext.resultByString(result: String, contextType: String? = null) =
+        resultByByteArray(result.toByteArray(), contextType)
+
+    private fun WebActionContext.resultByByteArray(result: ByteArray, contextType: String? = null) {
+        contextType?.let { response.contentType = it }
+        response.contentLength = result.size.toLong()
+        response.write(result)
     }
 
-    private fun WebActionContext.buildResult(obj: Any?) {
-        response.contentType = "application/json"
-        response.body = jsonEncoder(this, JSON.toJSONString(obj))
+    private fun WebActionContext.resultByInputStream(
+        result: InputStream,
+        contextType: String? = null,
+        length: Long? = null
+    ) {
+        length?.let { response.contentLength = it }
+        contextType?.let { response.contentType = it }
+        response.write(result)
+    }
+
+    private fun WebActionContext.buildResult(obj: Any) {
+        when (obj) {
+            is String -> makeStringHeader(obj).let { resultByString(it.first, it.second) }
+            else -> resultByString(jsonEncoder(this, JSON.toJSONString(obj)), "application/json")
+        }
     }
 
     fun HttpRequest.readBody(charset: String): String {

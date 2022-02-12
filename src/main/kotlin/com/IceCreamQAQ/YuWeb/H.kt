@@ -3,6 +3,7 @@ package com.IceCreamQAQ.YuWeb
 import com.alibaba.fastjson.JSONObject
 import org.smartboot.http.server.HttpResponse
 import org.smartboot.http.common.enums.HttpStatus
+import java.io.InputStream
 import java.io.OutputStream
 import java.lang.StringBuilder
 import java.net.InetSocketAddress
@@ -67,6 +68,9 @@ class H {
         open fun makeResp() {
 
         }
+
+        abstract fun write(ba: ByteArray)
+        abstract fun write(input: InputStream)
     }
 
     class SmartHttpResponse(val response: HttpResponse) : Response() {
@@ -93,6 +97,16 @@ class H {
             }
             response.httpStatus = HttpStatus.valueOf(this.status)
             if (this.contentLength > 0) response.setContentLength(this.contentLength.toInt())
+        }
+
+        override fun write(ba: ByteArray) {
+            makeResp()
+            response.write(ba)
+        }
+
+        override fun write(input: InputStream) {
+            makeResp()
+            input.use { it.copyTo(response.outputStream) }
         }
     }
 
