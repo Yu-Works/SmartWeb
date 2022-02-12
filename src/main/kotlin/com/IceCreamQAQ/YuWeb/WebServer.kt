@@ -192,14 +192,6 @@ class WebServer(
 
                 if (result is Render) result.doRender(resp)
                 else context.buildResult(result)
-
-//                if (context.render != null) {
-//                    context.render!!.doRender(resp)
-//                } else {
-//
-//                }
-
-                if (resp.alive) resp.makeResp()
             }
         })
         bootstrap.setPort(port).start()
@@ -237,6 +229,8 @@ class WebServer(
     private fun WebActionContext.buildResult(obj: Any) {
         when (obj) {
             is String -> makeStringHeader(obj).let { resultByString(it.first, it.second) }
+            is Byte -> resultByByteArray(byteArrayOf(obj))
+            is ByteArray -> resultByByteArray(obj)
             else -> resultByString(jsonEncoder(this, JSON.toJSONString(obj)), "application/json")
         }
     }
