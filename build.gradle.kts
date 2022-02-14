@@ -2,22 +2,87 @@ plugins {
     java
     kotlin("jvm") version "1.6.10"
     `java-library`
-    `maven-publish`
+//    `maven-publish`
 }
+val coreVersion = "Yu-Core:0.2.0.0-DEV13"
 
-group = "com.IceCreamQAQ.Yu"
-version = "0.0.2.0-DEV20"
 
-repositories {
-    mavenLocal()
-    maven("https://maven.icecreamqaq.com/repository/maven-public/")
+
+allprojects {
+    version = "0.0.2.0-DEV19-TestBuild"
+    group = if (name == "WebCore") "com.IceCreamQAQ.Yu"
+    else "com.IceCreamQAQ.Yu.WebCore"
+
+    repositories {
+        mavenLocal()
+        maven("https://maven.icecreamqaq.com/repository/maven-public/")
+    }
+
+    pluginManager.apply(JavaLibraryPlugin::class.java)
+    pluginManager.apply(MavenPublishPlugin::class.java)
+
+    configure<PublishingExtension> {
+        publications {
+            create<MavenPublication>(name) {
+                groupId = project.group.toString()
+                artifactId = name
+                version = version.toString()
+
+                pom {
+                    name.set("Rain Java Dev Framework")
+                    description.set("Rain Java Dev Framework")
+                    url.set("https://github.com/IceCream-Open/Rain")
+                    licenses {
+                        license {
+                            name.set("The Apache License, Version 2.0")
+                            url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                        }
+                    }
+                    developers {
+                        developer {
+                            id.set("IceCream")
+                            name.set("IceCream")
+                            email.set("www@withdata.net")
+                        }
+                    }
+                    scm {
+                        connection.set("")
+                    }
+                }
+//                from(components["java"])
+            }
+        }
+
+        repositories {
+            mavenLocal()
+            maven {
+                val snapshotsRepoUrl = "https://maven.icecreamqaq.com/repository/maven-snapshots/"
+                val releasesRepoUrl = "https://maven.icecreamqaq.com/repository/maven-releases/"
+                url = uri(if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
+
+
+                credentials {
+
+                    val mvnInfo = readMavenUserInfo("IceCream")
+                    username = mvnInfo[0]
+                    password = mvnInfo[1]
+                }
+            }
+        }
+    }
+
+    dependencies {
+        implementation("com.IceCreamQAQ:$coreVersion")
+    }
+
 }
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("com.IceCreamQAQ:Yu-Core:0.2.0.0-DEV13")
     api("org.smartboot.http:smart-http-server:1.1.4")
 }
+
+
 
 java {
     withSourcesJar()
@@ -37,57 +102,57 @@ tasks {
     }
 }
 
-publishing {
-
-    publications {
-        create<MavenPublication>("WebCore") {
-            groupId = group.toString()
-            artifactId = name
-            version = project.version.toString()
-
-            pom {
-                name.set("Rain Java Dev Framework")
-                description.set("Rain Java Dev Framework")
-                url.set("https://github.com/IceCream-Open/Rain")
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("IceCream")
-                        name.set("IceCream")
-                        email.set("www@withdata.net")
-                    }
-                }
-                scm {
-                    connection.set("")
-                }
-            }
-            from(components["java"])
-        }
-    }
-
-    repositories {
-        mavenLocal()
-        maven {
-            val snapshotsRepoUrl = "https://maven.icecreamqaq.com/repository/maven-snapshots/"
-            val releasesRepoUrl = "https://maven.icecreamqaq.com/repository/maven-releases/"
-            url = uri(if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
-
-
-            credentials {
-
-                val mvnInfo = readMavenUserInfo("IceCream")
-                username = mvnInfo[0]
-                password = mvnInfo[1]
-            }
-        }
-    }
-
-}
+//publishing {
+//
+//    publications {
+//        create<MavenPublication>(name) {
+//            groupId = group.toString()
+//            artifactId = name
+//            version = project.version.toString()
+//
+//            pom {
+//                name.set("Rain Java Dev Framework")
+//                description.set("Rain Java Dev Framework")
+//                url.set("https://github.com/IceCream-Open/Rain")
+//                licenses {
+//                    license {
+//                        name.set("The Apache License, Version 2.0")
+//                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+//                    }
+//                }
+//                developers {
+//                    developer {
+//                        id.set("IceCream")
+//                        name.set("IceCream")
+//                        email.set("www@withdata.net")
+//                    }
+//                }
+//                scm {
+//                    connection.set("")
+//                }
+//            }
+//            from(components["java"])
+//        }
+//    }
+//
+//    repositories {
+//        mavenLocal()
+//        maven {
+//            val snapshotsRepoUrl = "https://maven.icecreamqaq.com/repository/maven-snapshots/"
+//            val releasesRepoUrl = "https://maven.icecreamqaq.com/repository/maven-releases/"
+//            url = uri(if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
+//
+//
+//            credentials {
+//
+//                val mvnInfo = readMavenUserInfo("IceCream")
+//                username = mvnInfo[0]
+//                password = mvnInfo[1]
+//            }
+//        }
+//    }
+//
+//}
 fun readMavenUserInfo(id: String) =
     fileOr(
         "mavenInfo.txt",
