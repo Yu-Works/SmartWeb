@@ -22,14 +22,6 @@ class RythmTempleEngine : TempleEngine {
     }
 
     override fun getTemple(path: String): Temple? {
-        val location = "rythm/$path.html"
-        Thread.currentThread().contextClassLoader.getResource(location)?.let {
-            println(it)
-            File(it.toURI()).apply {
-                println(exists())
-                println(absolutePath)
-            }
-        }
         return RythmTemple(
             engine,
             File(
