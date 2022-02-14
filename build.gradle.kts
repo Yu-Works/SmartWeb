@@ -4,7 +4,7 @@ plugins {
     `java-library`
 //    `maven-publish`
 }
-val coreVersion = "Yu-Core:0.2.0.0-DEV13"
+val coreVersion = "Yu-Core:0.2.0.0-DEV18"
 
 
 
