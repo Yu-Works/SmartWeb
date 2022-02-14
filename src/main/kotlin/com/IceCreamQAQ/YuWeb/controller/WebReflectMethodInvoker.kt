@@ -1,8 +1,10 @@
 package com.IceCreamQAQ.YuWeb.controller
 
 import com.IceCreamQAQ.Yu.annotation.Action
+import com.IceCreamQAQ.Yu.annotation.Default
 import com.IceCreamQAQ.Yu.controller.ActionContext
 import com.IceCreamQAQ.Yu.controller.MethodInvoker
+import com.IceCreamQAQ.Yu.toObject
 import com.IceCreamQAQ.YuWeb.H
 import com.IceCreamQAQ.YuWeb.WebActionContext
 import com.IceCreamQAQ.YuWeb.annotation.Output
@@ -10,6 +12,7 @@ import com.IceCreamQAQ.YuWeb.annotation.RequestBody
 import com.IceCreamQAQ.YuWeb.annotation.RequestParameter
 import com.IceCreamQAQ.YuWeb.toParaName
 import com.IceCreamQAQ.YuWeb.validation.*
+import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.util.TypeUtils
 import java.lang.reflect.Method
 import javax.inject.Named
@@ -32,6 +35,7 @@ class WebReflectMethodInvoker(
         val isArray: Boolean,
         val isSimple: Boolean,
         val isSaved: Boolean,
+        val default: String?,
         var isBody: Boolean,
         var isPara: Boolean,
         val cts: (Array<String>.() -> Any?)? = null,
@@ -89,6 +93,7 @@ class WebReflectMethodInvoker(
                 isArray,
                 isSimple,
                 para.getAnnotation(Output::class.java) != null,
+                para.getAnnotation(Default::class.java)?.value,
                 para.type.getAnnotation(RequestBody::class.java) != null,
                 para.type.getAnnotation(RequestParameter::class.java) != null,
                 cts,
@@ -243,7 +248,7 @@ class WebReflectMethodInvoker(
                 12 -> context.request.session
                 15 -> context
                 else -> context[mp.data.toString(), mp]
-            }
+            } ?: mp.default?.let { str2Type(it, mp.clazz) }
             mp.vds?.let {
                 for (vd in it) {
                     vd.validator.validate(vd.annotation, p)
@@ -272,6 +277,25 @@ class WebReflectMethodInvoker(
     companion object {
         val reqParaName = arrayOf("req", "request", "paras", "parameters", "body", "reqbody", "requestbody")
     }
+
+    fun str2Type(data: String, clazz: Class<*>) =
+        when (clazz) {
+            String::class.java -> data
+            Boolean::class.java, Boolean::class.javaObjectType -> data.toBoolean()
+            Byte::class.java, Byte::class.javaObjectType -> data.toByte()
+            Short::class.java, Short::class.javaObjectType -> data.toShort()
+            Int::class.java, Int::class.javaObjectType -> data.toInt()
+            Long::class.java, Long::class.javaObjectType -> data.toLong()
+            Char::class.java, Char::class.javaObjectType -> data[0]
+            Float::class.java, Float::class.javaObjectType -> data.toFloat()
+            Double::class.java, Double::class.javaObjectType -> data.toDouble()
+            else -> {
+                if (clazz.isArray) {
+                    if (!data.startsWith("[") || !data.endsWith("]")) error("目标类型为数组，但值并不以 '[' 开头，或不以 ']' 结尾。")
+                    JSON.parseArray(data, clazz).toTypedArray()
+                } else data.toObject(clazz)
+            }
+        }
 
     operator fun WebActionContext.get(name: String, mp: MethodPara): Any? {
         val clazz = mp.clazz
