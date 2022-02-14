@@ -11,3 +11,5 @@ annotation class WebController
 
 annotation class RequestParameter
 annotation class RequestBody
+
+annotation class Output

@@ -4,6 +4,7 @@ import com.IceCreamQAQ.Yu.annotation.Action
 import com.IceCreamQAQ.Yu.annotation.Catch
 import com.IceCreamQAQ.Yu.toJSONString
 import com.IceCreamQAQ.YuWeb.H
+import com.IceCreamQAQ.YuWeb.annotation.Output
 import com.IceCreamQAQ.YuWeb.annotation.WebController
 import com.IceCreamQAQ.YuWeb.controller.render.RenderStream
 import com.IceCreamQAQ.YuWeb.validation.Max
@@ -19,6 +20,6 @@ import javax.inject.Named
 class TestController {
 
     @Action("helloRythm")
-    fun helloRythm() = "hello"
+    fun helloRythm(@Output who:String) = "hello"
 
 }

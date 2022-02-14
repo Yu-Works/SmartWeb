@@ -5,6 +5,7 @@ import com.IceCreamQAQ.Yu.controller.ActionContext
 import com.IceCreamQAQ.Yu.controller.MethodInvoker
 import com.IceCreamQAQ.YuWeb.H
 import com.IceCreamQAQ.YuWeb.WebActionContext
+import com.IceCreamQAQ.YuWeb.annotation.Output
 import com.IceCreamQAQ.YuWeb.annotation.RequestBody
 import com.IceCreamQAQ.YuWeb.annotation.RequestParameter
 import com.IceCreamQAQ.YuWeb.toParaName
@@ -30,6 +31,7 @@ class WebReflectMethodInvoker(
         val data: Any,
         val isArray: Boolean,
         val isSimple: Boolean,
+        val isSaved: Boolean,
         var isBody: Boolean,
         var isPara: Boolean,
         val cts: (Array<String>.() -> Any?)? = null,
@@ -86,6 +88,7 @@ class WebReflectMethodInvoker(
                 data,
                 isArray,
                 isSimple,
+                para.getAnnotation(Output::class.java) != null,
                 para.type.getAnnotation(RequestBody::class.java) != null,
                 para.type.getAnnotation(RequestParameter::class.java) != null,
                 cts,
@@ -247,6 +250,7 @@ class WebReflectMethodInvoker(
                         ?.run { throw ValidateFailException(className, methodName, mp.name, this) }
                 }
             }
+            p?.let { if (mp.isSaved) context[mp.name] = it }
             paras[i] = p
         }
         return paras
