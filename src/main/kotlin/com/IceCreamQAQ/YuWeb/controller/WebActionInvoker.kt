@@ -4,12 +4,17 @@ import com.IceCreamQAQ.Yu.controller.ActionContext
 import com.IceCreamQAQ.Yu.controller.DefaultActionInvoker
 import com.IceCreamQAQ.Yu.toLowerCaseFirstOne
 import com.IceCreamQAQ.YuWeb.WebActionContext
+import com.IceCreamQAQ.YuWeb.temple.Temple
 import com.IceCreamQAQ.YuWeb.validation.ValidatorFactory
 import java.lang.reflect.Method
 
 
-class WebActionInvoker(level: Int, method: Method, instance: Any, val factory: ValidatorFactory) :
-    DefaultActionInvoker(level, method, instance) {
+class WebActionInvoker(
+    level: Int, method: Method,
+    instance: Any,
+    val factory: ValidatorFactory,
+    val temple: Temple?
+) : DefaultActionInvoker(level, method, instance) {
 //    override val invoker: MethodInvoker = WebReflectMethodInvoker(method, instance, null, factory)
 
     override fun createMethodInvoker(method: Method, instance: Any) =

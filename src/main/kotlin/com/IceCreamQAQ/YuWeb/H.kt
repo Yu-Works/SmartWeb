@@ -21,12 +21,15 @@ class H {
         val userAgent: String,
         val contentType: String,
         val charset: String,
+        accept: String,
 
         val queryString: String,
 
         val userAddress: InetSocketAddress,
     ) {
         //        lateinit var header: Map<String, String>
+        val accept: Array<String> = accept.split(";")[0].split(",").map { it.trim().toLowerCase() }.toTypedArray()
+
         var cookies: Map<String, Cookie>? = null
         lateinit var session: Session
 

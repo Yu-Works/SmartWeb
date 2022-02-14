@@ -82,7 +82,7 @@ class WebServer(
                 val cookiesString = request.getHeader("Cookie")
 
                 val req =
-                    with(request) {
+                    request.run {
                         val headers = arrayListOf<H.Header>()
                         for (name in headerNames) for (header in getHeaders(name)) headers.add(H.Header(name, header))
 
@@ -96,6 +96,7 @@ class WebServer(
                             userAgent = getHeader("User-Agent") ?: "",
                             contentType = contentType,
                             charset = characterEncoding,
+                            accept = getHeader("Accept") ?: "*/*",
 
                             queryString = queryString ?: "",
 
@@ -229,6 +230,12 @@ class WebServer(
     }
 
     private fun WebActionContext.buildResult(obj: Any) {
+        invoker.temple?.let {
+            if (request.accept[0] == "text/html"){
+                resultByString(it.invoke(this),"text/html")
+                return
+            }
+        }
         when (obj) {
             is String -> makeStringHeader(obj).let { resultByString(it.first, it.second) }
             is Byte -> resultByByteArray(byteArrayOf(obj))
