@@ -9,7 +9,7 @@ val coreVersion = "Yu-Core:0.2.0.0-DEV18"
 
 
 allprojects {
-    version = "0.0.2.0-DEV19-TestBuild"
+    version = "0.0.2.0-DEV20"
     group = if (name == "WebCore") "com.IceCreamQAQ.Yu"
     else "com.IceCreamQAQ.Yu.WebCore"
 
