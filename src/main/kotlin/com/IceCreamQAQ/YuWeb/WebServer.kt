@@ -76,7 +76,7 @@ class WebServer(
                 }
 
 
-                val path = request.requestURI
+                val path = request.requestURI!!
                 val contentType = request.contentType ?: ""
 
                 val cookiesString = request.getHeader("Cookie")
@@ -181,17 +181,20 @@ class WebServer(
                     )
                     return
                 }
+                var result = context.result
 
                 if (!context.success) {
-                    response.httpStatus = HttpStatus.valueOf(404)
-                    return
+                    if (path.startsWith("/asset/"))
+                        this::class.java.classLoader
+                            .getResource(path.substring(1))
+                            ?.let { result = File(it.file) }
+                    if (result == null) {
+                        response.httpStatus = HttpStatus.valueOf(404)
+                        return
+                    }
                 }
 
-                val result = context.result
-
-
-
-                if (result is Render) result.doRender(resp)
+                if (result is Render) (result as Render).doRender(resp)
                 else context.buildResult(result)
             }
         })
@@ -228,9 +231,9 @@ class WebServer(
     }
 
     private fun WebActionContext.buildResult(obj: Any?) {
-        invoker.temple?.let {
-            if (request.accept[0] == "text/html"){
-                resultByString(it.invoke(this),"text/html")
+        invoker?.temple?.let {
+            if (request.accept[0] == "text/html") {
+                resultByString(it.invoke(this), "text/html")
                 return
             }
         }
@@ -247,8 +250,12 @@ class WebServer(
             is ByteArray -> resultByByteArray(obj)
             is InputStream -> resultByInputStream(obj)
             is File -> {
-                response.header["Content-Disposition"] = "filename=\"${obj.name}\""
-                resultByInputStream(FileInputStream(obj), "application/octet-stream", obj.length())
+                val suffix = obj.name.let { it.substring(it.lastIndexOf(".") + 1) }
+                val contentType = defaultFileContentType[suffix] ?: run{
+                    response.header["Content-Disposition"] = "filename=\"${obj.name}\""
+                    "application/octet-stream"
+                }
+                resultByInputStream(FileInputStream(obj), contentType, obj.length())
             }
             else -> resultByString(jsonEncoder(this, JSON.toJSONString(obj)), "application/json")
         }

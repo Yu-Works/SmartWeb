@@ -16,7 +16,7 @@ class WebActionContext(
     var saves = HashMap<String, Any>()
     var success = false
 
-    lateinit var invoker: WebActionInvoker
+    var invoker: WebActionInvoker? = null
 
     var result: Any? = null
 
