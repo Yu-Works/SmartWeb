@@ -21,6 +21,8 @@ import javax.inject.Named
 class TestController {
 
     @Action("helloRythm")
-    fun helloRythm(@Default("World") @Output who:String) = "hello"
+    fun helloRythm(@Default("World") @Output who: String) {
+
+    }
 
 }

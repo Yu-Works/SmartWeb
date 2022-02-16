@@ -172,17 +172,16 @@ class WebServer(
                 } catch (e: Exception) {
                     e.printStackTrace()
                     response.httpStatus = HttpStatus.valueOf(500)
-//                    response.write("<!DOCTYPE html>\n<html><body><div>".toByteArray())
                     if (isDev) response.write(
-                        e.stackTraceToString().replace("\t", "    ").replace(" ", "&nbsp;").replace("\n", "<br>")
+                        e.stackTraceToString()
+                            .replace("\t", "    ")
+                            .replace(" ", "&nbsp;")
+                            .replace("\n", "<br>")
                             .toByteArray()
                     )
-//                    response.write("</div></body></html>".toByteArray())
                     return
                 }
-                fun statusCode(code: Int) {
-                    response.httpStatus = HttpStatus.valueOf(code)
-                }
+
                 if (!context.success) {
                     response.httpStatus = HttpStatus.valueOf(404)
                     return
@@ -190,8 +189,7 @@ class WebServer(
 
                 val result = context.result
 
-                if (result == null && method == "post") return statusCode(201)
-                if (result == null) return statusCode(204)
+
 
                 if (result is Render) result.doRender(resp)
                 else context.buildResult(result)
@@ -229,13 +227,20 @@ class WebServer(
         response.write(result)
     }
 
-    private fun WebActionContext.buildResult(obj: Any) {
+    private fun WebActionContext.buildResult(obj: Any?) {
         invoker.temple?.let {
             if (request.accept[0] == "text/html"){
                 resultByString(it.invoke(this),"text/html")
                 return
             }
         }
+
+        fun statusCode(code: Int) {
+            response.status = code
+        }
+        if (result == null && request.method == "post") return statusCode(201)
+        if (result == null) return statusCode(204)
+
         when (obj) {
             is String -> makeStringHeader(obj).let { resultByString(it.first, it.second) }
             is Byte -> resultByByteArray(byteArrayOf(obj))
