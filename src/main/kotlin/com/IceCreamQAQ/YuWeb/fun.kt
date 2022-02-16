@@ -10,3 +10,23 @@ fun file(vararg names: String): File? {
     }
     return null
 }
+
+val defaultFileContentType = hashMapOf(
+    // 图片资源
+    "png" to "mage/png",
+    "gif" to "image/gif",
+    "jpg" to "mage/jpeg",
+    "jpeg" to "mage/jpeg",
+
+    // 音频资源
+    "mp3" to "audio/mp3",
+
+    // 视频资源
+    "mp4" to "video/mpeg4",
+
+    // Web 资源
+    "js" to "application/x-javascript",
+    "css" to "text/css",
+    "html" to "text/html",
+//    "" to "",
+)
