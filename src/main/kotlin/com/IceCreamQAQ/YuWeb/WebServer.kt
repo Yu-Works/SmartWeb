@@ -238,8 +238,8 @@ class WebServer(
         fun statusCode(code: Int) {
             response.status = code
         }
-        if (result == null && request.method == "post") return statusCode(201)
-        if (result == null) return statusCode(204)
+        if (obj == null && request.method == "post") return statusCode(201)
+        if (obj == null) return statusCode(204)
 
         when (obj) {
             is String -> makeStringHeader(obj).let { resultByString(it.first, it.second) }
