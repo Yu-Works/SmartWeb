@@ -1,15 +1,13 @@
 plugins {
     java
     kotlin("jvm") version "1.6.10"
-    `java-library`
-//    `maven-publish`
 }
 val coreVersion = "Yu-Core:0.2.0.0-DEV18"
 
 
 
 allprojects {
-    version = "0.0.2.0-DEV21"
+    version = "0.0.2.0-DEV22"
     group = if (name == "WebCore") "com.IceCreamQAQ.Yu"
     else "com.IceCreamQAQ.Yu.WebCore"
 
@@ -21,6 +19,9 @@ allprojects {
     pluginManager.apply(JavaLibraryPlugin::class.java)
     pluginManager.apply(MavenPublishPlugin::class.java)
 
+    java {
+        withSourcesJar()
+    }
     configure<PublishingExtension> {
         publications {
             create<MavenPublication>(name) {
@@ -49,7 +50,7 @@ allprojects {
                         connection.set("")
                     }
                 }
-//                from(components["java"])
+                from(components["java"])
             }
         }
 
@@ -70,6 +71,7 @@ allprojects {
             }
         }
     }
+
 
     dependencies {
         implementation("com.IceCreamQAQ:$coreVersion")
