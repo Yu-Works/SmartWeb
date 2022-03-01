@@ -19,7 +19,11 @@ import java.io.InputStreamReader
 import java.lang.Exception
 import kotlin.collections.HashMap
 
-class WebServer(
+interface WebServer{
+
+}
+
+class WebServerSS(
     private val port: Int,
     corsStr: String?,
     private val router: Router,

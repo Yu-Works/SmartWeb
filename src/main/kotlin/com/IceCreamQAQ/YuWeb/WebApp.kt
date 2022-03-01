@@ -22,10 +22,6 @@ class WebApp : ApplicationService {
     @field:Named("WebSession")
     private lateinit var sessionCache: EhcacheHelp<H.Session>
 
-//    private inline fun <reified T : Any> inject(name:String = ""): T {
-//
-//    }
-
     override fun init() {
 
     }

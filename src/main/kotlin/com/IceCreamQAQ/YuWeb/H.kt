@@ -169,3 +169,136 @@ class H {
 
     data class Header(var name: String, val value: String)
 }
+
+class NH{
+    interface Request {
+        val scheme: String
+        val host: String
+        val url: String
+        val path: String
+        val method: String
+        val headers: Array<Header>
+
+        val contentType: String
+        val charset: String
+        val queryString: String
+
+        val accept: Accept
+
+        val session: Session
+        val cookies: Array<Cookie>
+
+        val parameters: Map<String, Array<String>>
+        val body: JSONObject?
+        val inputStream: InputStream?
+
+        val userAgent: String
+        val userAddress: Array<String>
+        val clientAddress: InetSocketAddress
+
+        val cors: CORS?
+
+        fun header(name: String): Header? {
+            for (header in headers) {
+                if (header.name == name) return header
+            }
+            return null
+        }
+
+        fun headers(name: String) = headers.filter { it.name == name }
+        fun cookie(name: String): Cookie? {
+            for (cookie in cookies) {
+                if (cookie.key == name) return cookie
+            }
+            return null
+        }
+
+        fun getParameter(name: String): String? = getParameterValues(name)?.get(0)
+        fun getParameterValues(name: String): Array<String>?
+    }
+
+    interface Response {
+        var status: Int
+        val cookies: List<Cookie>
+
+        val headers: List<Header>
+
+        var contentType: String?
+        var charset:String?
+        var contentLength: Long
+
+        fun addCookie(cookie: Cookie)
+        fun addHeader(header: Header)
+
+        /***
+         * 获取当前会话的输出流。
+         * 我们非常不推荐您直接调用这个方法！！！
+         * 请尽量不要直接调用这个方法！！！
+         */
+        val output: OutputStream
+    }
+
+    data class Header(val name: String, val value: String)
+    class Cookie(
+        var key: String,
+        var value: String? = null,
+        var httpOnly: Boolean = false,
+        var domain: String? = null,
+        var path: String? = null,
+        var maxAge: Long? = null
+    ) {
+        private var expires: String? = null
+
+        fun setExpires(date: Date) {
+            expires = date.toString()
+        }
+
+        fun setExpires(dateStr: String) {
+            expires = dateStr
+        }
+
+        fun setExpires(date: Long) {
+            expires = Date(date).toString()
+        }
+
+        fun toCookieString(): String {
+            val csb = StringBuilder(key)
+            csb.append("=").append(value)
+
+            if (domain != null) csb.append("; Domain=").append(domain)
+            if (path != null) csb.append("; Path=").append(path)
+            if (expires != null) csb.append("; Expires=").append(expires)
+            if (maxAge != null) csb.append("; Max-Age=").append(maxAge.toString())
+            if (httpOnly) csb.append("; HttpOnly")
+
+            return csb.toString()
+        }
+    }
+
+    class Session(var id: String, var saves: MutableMap<String, Any>) {
+
+        operator fun get(key: String): Any? {
+            return saves[key]
+        }
+
+        operator fun set(key: String, value: Any) {
+            saves[key] = value
+        }
+
+        fun toCookie() = Cookie("NyxSession", id, true)
+    }
+
+    class Accept(
+        val mediaType: Array<String>,
+        val charset: String,
+        val encoding: String,
+        val language: String,
+    ) {
+        val allMediaType = mediaType.contains("*/*")
+
+        fun findAcceptTypeForce(mediaType: String) = this.mediaType.contains(mediaType)
+        fun findAcceptType(mediaType: String): Boolean = allMediaType || this.mediaType.contains(mediaType)
+    }
+
+    class CORS
+}
