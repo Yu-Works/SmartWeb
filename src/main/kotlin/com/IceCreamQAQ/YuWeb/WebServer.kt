@@ -11,7 +11,6 @@ import org.smartboot.http.server.HttpRequest
 import org.smartboot.http.server.HttpResponse
 import org.smartboot.http.common.enums.HttpStatus
 import org.smartboot.http.server.HttpServerHandle
-import sun.security.util.Length
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
@@ -19,30 +18,67 @@ import java.io.InputStreamReader
 import java.lang.Exception
 import kotlin.collections.HashMap
 
-interface WebServer{
+interface WebServer {
+
+    fun name(name: String): WebServer
+    fun isDev(dev: Boolean): WebServer
+    fun port(port: Int): WebServer
+    fun corsStr(corsStr: String?): WebServer
+    fun router(router: Router): WebServer
+    fun sessionCache(cache: EhcacheHelp<H.Session>): WebServer
+    fun createSession(createSession: () -> H.Session): WebServer
+
+    fun start()
+    fun stop()
 
 }
 
-class WebServerSS(
-    private val port: Int,
-    corsStr: String?,
-    private val router: Router,
-    val cache: EhcacheHelp<H.Session>,
-    val createSession: () -> H.Session
-) {
+class WebServerSS : WebServer {
 
-    val cors: Boolean
-    val corsDomain: Array<String>
+    private fun self(block: () -> Unit): WebServerSS {
+        block()
+        return this
+    }
 
-    val isDev = file("pom.xml", "build.gradle", "build.gradle.kts") != null
+    lateinit var name: String
+    override fun name(name: String): WebServer = self {
+        this.name = name
+    }
 
+    var isDev = false
+    override fun isDev(dev: Boolean): WebServer = self {
+        this.isDev = isDev
+    }
 
-    init {
+    private var port: Int = -1
+    override fun port(port: Int): WebServer = self {
+        this.port = port
+    }
+
+    private lateinit var router: Router
+    override fun router(router: Router): WebServer = self {
+        this.router = router
+    }
+
+    lateinit var cache: EhcacheHelp<H.Session>
+    override fun sessionCache(cache: EhcacheHelp<H.Session>): WebServer = self {
+        this.cache = cache
+    }
+
+    lateinit var createSession: () -> H.Session
+    override fun createSession(createSession: () -> H.Session): WebServer = self {
+        this.createSession = createSession
+    }
+
+    var cors: Boolean = false
+    lateinit var corsDomain: Array<String>
+    override fun corsStr(corsStr: String?): WebServer = self {
         cors = corsStr != null
         corsDomain =
             if (cors) corsStr!!.split(",").map { it.trim() }.toTypedArray()
             else arrayOf()
     }
+
 
     companion object {
         var jsonDecoder: WebActionContext.(String) -> String = { it }
@@ -52,7 +88,7 @@ class WebServerSS(
     private lateinit var bootstrap: HttpBootstrap
     val enableMethod = arrayOf("get", "post", "put", "delete")
 
-    fun start() {
+    override fun start() {
         bootstrap = HttpBootstrap()
         bootstrap.configuration().bannerEnabled(false)
         bootstrap.configuration().threadNum(Runtime.getRuntime().availableProcessors() * 2)
@@ -255,7 +291,7 @@ class WebServerSS(
             is InputStream -> resultByInputStream(obj)
             is File -> {
                 val suffix = obj.name.let { it.substring(it.lastIndexOf(".") + 1) }
-                val contentType = defaultFileContentType[suffix] ?: run{
+                val contentType = defaultFileContentType[suffix] ?: run {
                     response.header["Content-Disposition"] = "filename=\"${obj.name}\""
                     "application/octet-stream"
                 }
@@ -279,7 +315,7 @@ class WebServerSS(
         return out.toString()
     }
 
-    fun stop() {
+    override fun stop() {
         bootstrap.shutdown()
     }
 
