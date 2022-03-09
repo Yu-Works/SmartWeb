@@ -50,12 +50,14 @@ class WebApp : ApplicationService {
             )
 
             val server = (context.newBean(serverImpl) as WebServer)
+                .isDev(isDev)
                 .name(k)
                 .port(port)
                 .corsStr(cors)
                 .router(v)
                 .sessionCache(sessionCache)
-                .createSession { val sid = UUID.randomUUID().toString()
+                .createSession {
+                    val sid = UUID.randomUUID().toString()
                     val psId = "${port}_$sid"
                     val session = H.Session(psId, HashMap())
                     sessionCache[psId] = session

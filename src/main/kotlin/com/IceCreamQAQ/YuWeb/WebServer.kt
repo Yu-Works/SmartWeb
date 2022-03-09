@@ -18,72 +18,68 @@ import java.io.InputStreamReader
 import java.lang.Exception
 import kotlin.collections.HashMap
 
-interface WebServer {
+abstract class WebServer {
 
-    fun name(name: String): WebServer
-    fun isDev(dev: Boolean): WebServer
-    fun port(port: Int): WebServer
-    fun corsStr(corsStr: String?): WebServer
-    fun router(router: Router): WebServer
-    fun sessionCache(cache: EhcacheHelp<H.Session>): WebServer
-    fun createSession(createSession: () -> H.Session): WebServer
+    companion object {
+        var jsonDecoder: WebActionContext.(String) -> String = { it }
+        var jsonEncoder: WebActionContext.(String) -> String = { it }
+    }
 
-    fun start()
-    fun stop()
-
-}
-
-class WebServerSS : WebServer {
-
-    private fun self(block: () -> Unit): WebServerSS {
+    open fun self(block: () -> Unit): WebServer {
         block()
         return this
     }
 
-    lateinit var name: String
-    override fun name(name: String): WebServer = self {
+    protected open lateinit var name: String
+    open fun name(name: String): WebServer = self {
         this.name = name
     }
 
-    var isDev = false
-    override fun isDev(dev: Boolean): WebServer = self {
-        this.isDev = isDev
+    protected open var isDev = false
+    open fun isDev(dev: Boolean): WebServer = self {
+        this.isDev = dev
     }
 
-    private var port: Int = -1
-    override fun port(port: Int): WebServer = self {
+    protected open var port: Int = -1
+    open fun port(port: Int): WebServer = self {
         this.port = port
     }
 
-    private lateinit var router: Router
-    override fun router(router: Router): WebServer = self {
+    protected open lateinit var router: Router
+    open fun router(router: Router): WebServer = self {
         this.router = router
     }
 
-    lateinit var cache: EhcacheHelp<H.Session>
-    override fun sessionCache(cache: EhcacheHelp<H.Session>): WebServer = self {
+    protected open lateinit var cache: EhcacheHelp<H.Session>
+    open fun sessionCache(cache: EhcacheHelp<H.Session>): WebServer = self {
         this.cache = cache
     }
 
-    lateinit var createSession: () -> H.Session
-    override fun createSession(createSession: () -> H.Session): WebServer = self {
+    protected open lateinit var createSession: () -> H.Session
+    open fun createSession(createSession: () -> H.Session): WebServer = self {
         this.createSession = createSession
     }
 
-    var cors: Boolean = false
-    lateinit var corsDomain: Array<String>
-    override fun corsStr(corsStr: String?): WebServer = self {
+    protected open var cors: Boolean = false
+    protected open lateinit var corsDomain: Array<String>
+    open fun corsStr(corsStr: String?): WebServer = self {
         cors = corsStr != null
         corsDomain =
             if (cors) corsStr!!.split(",").map { it.trim() }.toTypedArray()
             else arrayOf()
     }
 
+    abstract fun start()
+    abstract fun stop()
 
-    companion object {
-        var jsonDecoder: WebActionContext.(String) -> String = { it }
-        var jsonEncoder: WebActionContext.(String) -> String = { it }
+    open suspend fun onRequest(req: H.Request, resp: H.Response) {
+
     }
+
+}
+
+class WebServerSS : WebServer() {
+
 
     private lateinit var bootstrap: HttpBootstrap
     val enableMethod = arrayOf("get", "post", "put", "delete")
