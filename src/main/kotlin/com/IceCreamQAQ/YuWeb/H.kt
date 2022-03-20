@@ -1,8 +1,6 @@
 package com.IceCreamQAQ.YuWeb
 
 import com.alibaba.fastjson.JSONObject
-import org.smartboot.http.server.HttpResponse
-import org.smartboot.http.common.enums.HttpStatus
 import java.io.InputStream
 import java.io.OutputStream
 import java.lang.StringBuilder
