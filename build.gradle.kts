@@ -7,7 +7,7 @@ val coreVersion = "Yu-Core:0.2.0.0-DEV20"
 
 
 allprojects {
-    version = "0.0.2.0-DEV22"
+    version = "0.0.2.0-DEV23"
     val dir = projectDir.absolutePath.split(File.separator)
     val l2 = dir[dir.size - 2]
     group = if (name == "WebCore") "com.IceCreamQAQ.Yu"
