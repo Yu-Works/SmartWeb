@@ -2,7 +2,7 @@ plugins {
     java
     kotlin("jvm") version "1.6.10"
 }
-val coreVersion = "Yu-Core:0.2.0.0-DEV18"
+val coreVersion = "Yu-Core:0.2.0.0-DEV20"
 
 
 
@@ -85,7 +85,7 @@ allprojects {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    api("org.smartboot.http:smart-http-server:1.1.4")
+    api("org.smartboot.http:smart-http-server:1.1.12")
 }
 
 

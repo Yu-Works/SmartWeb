@@ -315,7 +315,7 @@ class WebReflectMethodInvoker(
             }
         }
         request.session[name]?.let { if (clazz.isInstance(it)) return it }
-        val rp = request.para
+        val rp = paras
         if (mp.isBody) return rp.toJSONString()
         if (rp.containsKey(name)) {
             var q = rp[name]!!

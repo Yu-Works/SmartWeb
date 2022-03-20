@@ -5,6 +5,7 @@ import com.IceCreamQAQ.Yu.web.ActionResult
 import com.IceCreamQAQ.YuWeb.controller.WebActionInvoker
 import com.IceCreamQAQ.YuWeb.controller.render.Render
 import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.JSONObject
 import java.lang.reflect.InvocationTargetException
 
 class WebActionContext(
@@ -13,6 +14,7 @@ class WebActionContext(
     val response: H.Response
 ) : ActionContext {
 
+    var paras = JSONObject()
     var saves = HashMap<String, Any>()
     var success = false
 
@@ -32,9 +34,9 @@ class WebActionContext(
         saves["response"] = response
     }
 
-    fun getCookie(name: String): H.Cookie? = request.cookies?.get(name)
+    fun getCookie(name: String): H.Cookie? = request.cookie(name)
 
-    override fun get(name: String): Any? = saves[name] ?: request.para[name] ?: request.session[name]
+    override fun get(name: String): Any? = saves[name] ?: request.getParameter(name) ?: request.session[name]
     override fun set(name: String, obj: Any) {
         saves[name] = obj
     }

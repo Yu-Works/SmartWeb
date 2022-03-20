@@ -5,25 +5,33 @@ import com.IceCreamQAQ.Yu.controller.Router
 import com.IceCreamQAQ.Yu.toJSONObject
 import com.IceCreamQAQ.YuWeb.controller.render.Render
 import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.JSONArray
+import com.alibaba.fastjson.JSONObject
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.smartboot.http.server.HttpBootstrap
-import org.smartboot.http.server.HttpRequest
-import org.smartboot.http.server.HttpResponse
 import org.smartboot.http.common.enums.HttpStatus
-import org.smartboot.http.server.HttpServerHandle
-import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
-import java.io.InputStreamReader
+import org.smartboot.http.server.*
+import java.io.*
 import java.lang.Exception
+import java.net.InetSocketAddress
+import java.util.*
+import java.util.concurrent.CompletableFuture
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 abstract class WebServer {
 
     companion object {
-        var jsonDecoder: WebActionContext.(String) -> String = { it }
-        var jsonEncoder: WebActionContext.(String) -> String = { it }
+        val enableMethod = arrayOf("get", "post", "put", "delete")
+
+        var jsonDecoder: (H.Request, H.Response, String) -> JSONObject = { _, _, it -> it.toJSONObject() }
+        var jsonEncoder: (H.Request, H.Response, String) -> String = { _, _, it -> it }
+
+        var xmlDecoder: (H.Request, H.Response, String) -> JSONObject = { _, _, it -> TODO() }
+        var xmlEncoder: (H.Request, H.Response, String) -> String = { _, _, it -> TODO() }
     }
+
 
     open fun self(block: () -> Unit): WebServer {
         block()
@@ -50,9 +58,9 @@ abstract class WebServer {
         this.router = router
     }
 
-    protected open lateinit var cache: EhcacheHelp<H.Session>
+    protected open lateinit var sessionCache: EhcacheHelp<H.Session>
     open fun sessionCache(cache: EhcacheHelp<H.Session>): WebServer = self {
-        this.cache = cache
+        this.sessionCache = cache
     }
 
     protected open lateinit var createSession: () -> H.Session
@@ -69,194 +77,132 @@ abstract class WebServer {
             else arrayOf()
     }
 
+    open fun findSession(id: String?, resp: H.Response): H.Session {
+        val sid = id ?: UUID.randomUUID().toString().let { resp.addCookie(H.Cookie("YuSid", it, true)) }
+        val psId = "${port}_$sid"
+        return sessionCache.getOrPut("${port}_$sid", H.Session(psId, HashMap()))
+    }
+
     abstract fun start()
     abstract fun stop()
 
     open suspend fun onRequest(req: H.Request, resp: H.Response) {
 
-    }
+        val method = req.method.toLowerCase()
 
-}
+        val origin = req.header("Origin")?.value
 
-class WebServerSS : WebServer() {
+        if (origin != null) {
+            if (!cors) return
+            if (origin !in corsDomain) return
 
+            resp.addHeader("Access-Control-Allow-Origin", origin)
+            resp.addHeader("Access-Control-Allow-Headers", "*")
+            resp.addHeader("Access-Control-Allow-Method", "GET,POST,OPTIONS,PUT,DELETE")
+            if (method == "options") return
+        }
 
-    private lateinit var bootstrap: HttpBootstrap
-    val enableMethod = arrayOf("get", "post", "put", "delete")
-
-    override fun start() {
-        bootstrap = HttpBootstrap()
-        bootstrap.configuration().bannerEnabled(false)
-        bootstrap.configuration().threadNum(Runtime.getRuntime().availableProcessors() * 2)
-        bootstrap.pipeline().next(object : HttpServerHandle() {
-            override fun doHandle(request: HttpRequest, response: HttpResponse) {
-
-                val method = request.method.toLowerCase()
-
-                val origin = request.getHeader("Origin")
-
-                if (origin != null) {
-                    if (!cors) return
-                    if (origin !in corsDomain) return
-
-                    response.setHeader("Access-Control-Allow-Origin", origin)
-                    response.setHeader("Access-Control-Allow-Headers", "*")
-                    response.setHeader("Access-Control-Allow-Method", "GET,POST,OPTIONS,PUT,DELETE")
-                    if (method == "options") return
-                }
-
-                if (method !in enableMethod) {
-//                    response.
-                    response.httpStatus = HttpStatus.valueOf(405)
-                    return
-                }
+        if (method !in enableMethod) {
+            resp.status = 405
+            return
+        }
 
 
-                val path = request.requestURI!!
-                val contentType = request.contentType ?: ""
-
-                val cookiesString = request.getHeader("Cookie")
-
-                val req =
-                    request.run {
-                        val headers = arrayListOf<H.Header>()
-                        for (name in headerNames) for (header in getHeaders(name)) headers.add(H.Header(name, header))
-
-                        H.Request(
-                            scheme = scheme,
-                            method = method,
-                            path = path,
-                            url = requestURL,
-
-                            headers = headers.toTypedArray(),
-                            userAgent = getHeader("User-Agent") ?: "",
-                            contentType = contentType,
-                            charset = characterEncoding,
-                            accept = getHeader("Accept") ?: "*/*",
-
-                            queryString = queryString ?: "",
-
-                            userAddress = remoteAddress
-                        )
+        val path = req.path
+        val p = path.substring(1, path.length).split("/")
+        val context = WebActionContext(p.toTypedArray(), req, resp)
+        req.parameters.forEach { (k, v) ->
+            context.paras[k] =
+                if (v.size == 1)
+                    v[0].let {
+                        if (it.contains(",")) JSONArray(it.split(","))
+                        else it
                     }
+                else JSONArray(v.toList())
+        }
+        req.body?.forEach { (k, v) -> context.paras[k] = v }
 
-                var session: H.Session? = null
-                if (cookiesString != null) {
-                    val cookieStrings = cookiesString.split(";")
+        try {
+            context.success = runBlocking { router.invoke(p[0], context) }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            resp.status = 500
+            if (isDev) context.result = e.stackTraceToString()
+                .replace("\t", "    ")
+                .replace(" ", "&nbsp;")
+                .replace("\n", "<br>")
+                .toByteArray()
+            return
+        }
+        var result = context.result
 
-                    val cookies = HashMap<String, H.Cookie>()
-                    for (cookieStr in cookieStrings) {
-                        val kvs = cookieStr.split("=")
-                        val cookie = H.Cookie()
-                        val key = kvs[0].trim()
-                        if (key == "YuSid") {
-                            val sid = kvs[1].trim()
-                            session = cache[sid]
-                            continue
-                        }
-                        cookie.key = key
-                        cookie.value = kvs[1].trim()
-                        cookies[key] = cookie
-                    }
-                    req.cookies = cookies
-                }
-
-                if (session == null) {
-                    session = createSession()
-                    response.addHeader("Set-Cookie", session.toCookie().toCookieString())
-                }
-
-//                req.para.putAll(request.parameters)
-                for ((k, v) in request.parameters)
-                    if (v.size == 1) req.para[k.toParaName()] = v[0]
-                    else req.para[k.toParaName()] = v[0]
-
-                req.session = session
-
-                val resp = H.SmartHttpResponse(response)
-//                resp.outputStream = response.outputStream
-
-                val p = path.substring(1, path.length).split("/")
-                val context = WebActionContext(p.toTypedArray(), req, resp)
-
-                if (method != "get") {
-                    val f = contentType.split(";")
-                    var charset = "UTF-8"
-                    for (i in 1 until f.size) {
-                        val s = f[i].trim().split("=")
-                        if (s.size != 2) continue
-                        when (s[0].trim().toLowerCase()) {
-                            "charset" -> charset = s[1].trim()
-                        }
-                    }
-                    when (f[0].trim()) {
-                        "application/json" -> {
-                            val body = jsonDecoder(context, request.readBody(charset))
-                            req.body = body.toJSONObject()
-                            for ((k, v) in req.body!!) req.para[k.toParaName()] = v
-                        }
-                        "application/xml" -> {
-                            val body = request.readBody(charset)
-//                            req.body = body.toJSONObject()
-//                            req.para.putAll(req.body!!)
-                        }
-                    }
-                }
-
-                try {
-                    context.success = runBlocking { router.invoke(p[0], context) }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    response.httpStatus = HttpStatus.valueOf(500)
-                    if (isDev) response.write(
-                        e.stackTraceToString()
-                            .replace("\t", "    ")
-                            .replace(" ", "&nbsp;")
-                            .replace("\n", "<br>")
-                            .toByteArray()
-                    )
-                    return
-                }
-                var result = context.result
-
-                if (!context.success) {
-                    if (path.startsWith("/asset/"))
-                        this::class.java.classLoader
-                            .getResource(path.substring(1))
-                            ?.let { result = File(it.file) }
-                    if (result == null) {
-                        response.httpStatus = HttpStatus.valueOf(404)
-                        return
-                    }
-                }
-
-                if (result is Render) (result as Render).doRender(resp)
-                else context.buildResult(result)
+        if (!context.success) {
+            if (path.startsWith("/asset/"))
+                this::class.java.classLoader
+                    .getResource(path.substring(1))
+                    ?.let { result = File(it.file) }
+            if (result == null) {
+                resp.status = 404
+                return
             }
-        })
-        bootstrap.setPort(port).start()
+        }
+
+        context.buildResult(result)
+//        if (result is Render) (result as Render).doRender(resp)
+//        else
+//
+//        val routers = req.method?.findRouter(this)
+//        val router = routers?.run {
+//            staticRouter[req.path] ?: matchRouter.firstOrNull { r -> r.match(context) }
+//        }
+//        val code: Int
+//        var result: Any? = null
+//        if (routers == null) {
+//            code = 501
+//            result = on501(context)
+//        } else if (router == null) {
+//            code = 404
+//            result = on404(context)
+//        } else {
+//            context.router = router
+//            router(context)
+//            if (context.error != null) {
+//                code = 500
+//                result = on500(context, context.error!!)
+//            } else if (context.result != null) {
+//                code = 200
+//                result = context.result
+//            } else {
+//                code = if (context.router?.templateInvoker != null && req.accept.findAcceptType("text/html")) {
+//                    result = context.router!!.templateInvoker!!(context)
+//                    200
+//                } else if (req.method == Method.POST) 201 else 204
+//            }
+//
+//        }
+//        resp.status = code
+//        return result?.let { resultBuilder(context, it) }
     }
 
-
-    private fun WebActionContext.makeStringHeader(text: String) =
+    open fun WebActionContext.makeStringHeader(text: String) =
         when {
-            text.startsWith("{") || text.startsWith("[") -> jsonEncoder(text) to "application/json"
+            text.startsWith("{") || text.startsWith("[") -> jsonEncoder(request, response, text) to "application/json"
             text.startsWith("<?xml") -> text to "application/xml"
             text.startsWith("<") -> text to "text/html"
             else -> text to "text/plain"
         }
 
 
-    private fun WebActionContext.resultByString(result: String, contextType: String? = null) =
+    open fun WebActionContext.resultByString(result: String, contextType: String? = null) =
         resultByByteArray(result.toByteArray(), contextType)
 
-    private fun WebActionContext.resultByByteArray(result: ByteArray, contextType: String? = null) {
+    open fun WebActionContext.resultByByteArray(result: ByteArray, contextType: String? = null) {
         contextType?.let { response.contentType = it }
         response.contentLength = result.size.toLong()
         response.write(result)
     }
 
-    private fun WebActionContext.resultByInputStream(
+    open fun WebActionContext.resultByInputStream(
         result: InputStream,
         contextType: String? = null,
         length: Long? = null
@@ -266,9 +212,10 @@ class WebServerSS : WebServer() {
         response.write(result)
     }
 
-    private fun WebActionContext.buildResult(obj: Any?) {
+    open fun WebActionContext.buildResult(obj: Any?) {
+        if (obj is Render) return obj.doRender(this, this@WebServer)
         invoker?.temple?.let {
-            if (request.accept[0] == "text/html") {
+            if (request.accept.mediaType[0] == "text/html") {
                 resultByString(it.invoke(this), "text/html")
                 return
             }
@@ -288,16 +235,165 @@ class WebServerSS : WebServer() {
             is File -> {
                 val suffix = obj.name.let { it.substring(it.lastIndexOf(".") + 1) }
                 val contentType = defaultFileContentType[suffix] ?: run {
-                    response.header["Content-Disposition"] = "filename=\"${obj.name}\""
+                    response.addHeader("Content-Disposition", "filename=\"${obj.name}\"")
                     "application/octet-stream"
                 }
                 resultByInputStream(FileInputStream(obj), contentType, obj.length())
             }
-            else -> resultByString(jsonEncoder(this, JSON.toJSONString(obj)), "application/json")
+            else -> resultByString(jsonEncoder(request, response, JSON.toJSONString(obj)), "application/json")
         }
     }
 
-    fun HttpRequest.readBody(charset: String): String {
+}
+
+class WebServerSS : WebServer() {
+
+
+    private lateinit var bootstrap: HttpBootstrap
+
+    class Req(private val request: HttpRequest) : H.Request {
+        override val scheme: String
+            get() = request.scheme
+        override val host: String
+            get() = request.remoteHost
+        override val url: String
+            get() = request.requestURL
+        override val path: String
+            get() = request.requestURI
+        override val method: String = request.method.toLowerCase()
+        override val headers: Array<H.Header> = ArrayList<H.Header>().apply {
+            request.headerNames.forEach { k ->
+                request.getHeaders(k).forEach { v -> add(H.Header(k, v)) }
+            }
+        }.toTypedArray()
+        override val contentType: String
+            get() = request.contentType
+        override val charset: String
+            get() = request.characterEncoding
+        override val queryString: String
+            get() = request.queryString
+
+        override val parameters: Map<String, Array<String>>
+            get() = request.parameters
+        override val cookies: Array<H.Cookie> = request.cookies.map { H.Cookie(it.name, it.value) }.toTypedArray()
+
+        override var body: JSONObject? = null
+        override val inputStream: InputStream? = null
+
+        override val userAgent: String
+            get() = request.getHeader("User-Agent")
+        override val userAddress: Array<String>
+            get() = TODO("Not yet implemented")
+        override val clientAddress: InetSocketAddress
+            get() = TODO("Not yet implemented")
+        override var cors: H.CORS? = null
+
+        override val accept: H.Accept = H.Accept(
+            (request.getHeader("Accept") ?: "*/*").split(",").map { it.trim() }.toTypedArray(),
+            "",
+            "",
+            ""
+        )
+        override lateinit var session: H.Session
+
+        override fun getParameterValues(name: String): Array<String>? = parameters[name]
+    }
+
+    class Resp(val response: HttpResponse) : H.Response {
+
+        override var status: Int = 200
+        override val cookies = ArrayList<H.Cookie>()
+        override val headers = ArrayList<H.Header>()
+        override var contentType: String? = null
+        override var charset: String? = null
+        override var contentLength: Long = -1
+
+        override fun addCookie(cookie: H.Cookie) {
+            cookies.add(cookie)
+        }
+
+        override fun addHeader(header: H.Header) {
+            headers.add(header)
+        }
+
+        override fun addHeader(key: String, value: String) {
+            headers.add(H.Header(key, value))
+        }
+
+        override val output: OutputStream
+            get() {
+                write()
+                return response.outputStream
+            }
+
+        override fun write() {
+            response.characterEncoding = this.charset
+            response.setContentType(this.contentType)
+
+            headers.forEach { response.addHeader(it.name, it.value) }
+            cookies.forEach { response.addHeader("Set-Cookie", it.toCookieString()) }
+
+            response.setHttpStatus(HttpStatus.valueOf(this.status))
+            if (this.contentLength > 0) response.setContentLength(this.contentLength.toInt())
+        }
+
+        override fun write(result: ByteArray) {
+            write()
+            response.write(result)
+        }
+
+        override fun write(result: InputStream) {
+            write()
+            result.use { it.copyTo(response.outputStream) }
+        }
+
+    }
+
+    override fun start() {
+        bootstrap = HttpBootstrap()
+        bootstrap.configuration().bannerEnabled(false)
+        bootstrap.configuration().threadNum(Runtime.getRuntime().availableProcessors() * 2)
+        bootstrap.httpHandler(object : HttpServerHandler() {
+            override fun handle(request: HttpRequest, response: HttpResponse, future: CompletableFuture<Any>) {
+                val req = Req(request)
+                val resp = Resp(response)
+                if (req.method != "get" && req.method != "head") {
+
+                    if (req.contentType.contains("multipart/form-data")) {
+                        val bound = req.contentType.split("boundary=")[1].trim()
+
+                        val input = req.inputStream!!
+//                        input.buffered().re
+                        println(request.readBody())
+                    }
+
+                    req.body = when (req.contentType) {
+                        "application/json" -> jsonDecoder(
+                            req,
+                            resp,
+                            request.readBody(request.characterEncoding)
+                        )
+                        "application/xml" -> xmlDecoder(
+                            req,
+                            resp,
+                            request.readBody(request.characterEncoding)
+                        )
+                        else -> null
+                    }
+                }
+
+                req.session = findSession(req.cookie("YuSid")?.value, resp)
+                GlobalScope.launch {
+                    onRequest(req, resp)
+                    future.complete(this)
+                }
+            }
+        })
+        bootstrap.setPort(port).start()
+    }
+
+
+    fun HttpRequest.readBody(charset: String = "UTF-8"): String {
         val bufferSize = 1024
         val buffer = CharArray(bufferSize)
         val out = StringBuilder()
