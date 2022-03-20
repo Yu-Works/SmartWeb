@@ -1,5 +1,6 @@
 package com.IceCreamQAQ.YuWeb
 
+import com.IceCreamQAQ.Yu.annotation.Config
 import com.IceCreamQAQ.Yu.`as`.ApplicationService
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
 import com.IceCreamQAQ.Yu.di.ConfigManager
@@ -29,6 +30,9 @@ class WebApp : ApplicationService {
     @Inject
     private lateinit var context: YuContext
 
+    @Config("yu.web.server.default")
+    private lateinit var defaultImpl: String
+
     override fun init() {
 
     }
@@ -46,7 +50,7 @@ class WebApp : ApplicationService {
                 configManager.get(configName, String::class.java)?.toInt() ?: error("No Server: $k's Port Config!")
             val cors = configManager.get(corsName, String::class.java)
             val serverImpl = Class.forName(
-                configManager.get(serverImplName, String::class.java) ?: "com.IceCreamQAQ.YuWeb.WebServerSS"
+                configManager.get(serverImplName, String::class.java) ?: defaultImpl
             )
 
             val server = (context.newBean(serverImpl) as WebServer)

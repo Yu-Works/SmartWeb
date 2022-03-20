@@ -85,7 +85,6 @@ allprojects {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    api("org.smartboot.http:smart-http-server:1.1.12")
 }
 
 
