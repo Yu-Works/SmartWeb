@@ -7,7 +7,6 @@ import com.IceCreamQAQ.Yu.toJSONString
 import com.IceCreamQAQ.YuWeb.H
 import com.IceCreamQAQ.YuWeb.annotation.Output
 import com.IceCreamQAQ.YuWeb.annotation.WebController
-import com.IceCreamQAQ.YuWeb.controller.render.RenderStream
 import com.IceCreamQAQ.YuWeb.validation.Max
 import com.IceCreamQAQ.YuWeb.validation.Min
 import com.IceCreamQAQ.YuWeb.validation.Valid

@@ -3,6 +3,6 @@ plugins {
 }
 
 dependencies{
-    implementation(rootProject)
+    implementation(project(":SmartHTTP"))
     api("org.rythmengine:rythm-engine:1.4.1")
 }
