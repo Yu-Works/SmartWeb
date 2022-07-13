@@ -61,7 +61,7 @@ class WebControllerLoader : DefaultControllerLoaderImpl() {
                 ?: item.loadBy::class.java.interfaces[0].getAnnotation(Named::class.java)?.value ?: ""
             val rootRouter = rootRouters.getOrPut(name) { RootRouter() }
 
-            controllerToRouter(context[clazz] ?: continue, rootRouter)
+            controllerToRouter(clazz,context[clazz] ?: continue, rootRouter)
         }
 
         for ((k, v) in rootRouters) {

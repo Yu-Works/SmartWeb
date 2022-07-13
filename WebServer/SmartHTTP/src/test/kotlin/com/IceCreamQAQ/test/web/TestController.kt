@@ -53,6 +53,13 @@ class TestController {
 //
     @Action("tvn")
     fun tvn(@Min(50) @Max(100) tn: Long) = "测试数值：$tn。"
+
+    data class User(val name: String, val sex: Boolean?)
+
+    @Action("update/{id}")
+    fun update(user: User, id: Int) {
+
+    }
 //
 ////    @Action("tcv")
 ////    fun tcv(tcv: Test) = tcv

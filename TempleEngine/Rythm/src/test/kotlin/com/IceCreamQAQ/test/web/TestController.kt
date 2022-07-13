@@ -24,4 +24,11 @@ class TestController {
 
     }
 
+    data class UserReq(val name: String, val phone: String)
+
+    @Action("user/{uid}/save")
+    fun save(user: UserReq, uid: Int) {
+
+    }
+
 }

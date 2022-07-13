@@ -3,8 +3,7 @@ package com.IceCreamQAQ.YuWeb.server.shttp
 import com.IceCreamQAQ.YuWeb.H
 import com.IceCreamQAQ.YuWeb.WebServer
 import com.alibaba.fastjson.JSONObject
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.smartboot.http.common.enums.HttpStatus
 import org.smartboot.http.server.HttpBootstrap
 import org.smartboot.http.server.HttpRequest
@@ -15,8 +14,29 @@ import java.io.InputStreamReader
 import java.io.OutputStream
 import java.net.InetSocketAddress
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 class SmartHTTPServer : WebServer() {
+
+    class SmartHttpScope(pool: CoroutineDispatcher) : CoroutineScope {
+
+        override val coroutineContext: CoroutineContext = pool
+
+    }
+
+    val pool = ThreadPoolExecutor(
+        Runtime.getRuntime().availableProcessors() * 2,
+        Runtime.getRuntime().availableProcessors() * 2,
+        60L,
+        TimeUnit.SECONDS,
+        LinkedBlockingQueue()
+    ).asCoroutineDispatcher()
+
+    val scope = SmartHttpScope(pool)
 
 
     private lateinit var bootstrap: HttpBootstrap
@@ -98,7 +118,7 @@ class SmartHTTPServer : WebServer() {
 
         override fun write() {
             response.characterEncoding = this.charset
-            response.setContentType(this.contentType)
+            this.contentType?.let { response.setContentType(it) }
 
             headers.forEach { response.addHeader(it.name, it.value) }
             cookies.forEach { response.addHeader("Set-Cookie", it.toCookieString()) }
@@ -153,10 +173,16 @@ class SmartHTTPServer : WebServer() {
                 }
 
                 req.session = findSession(req.cookie("YuSid")?.value, resp)
-                GlobalScope.launch {
+
+//                pool.interceptContinuation()
+
+//                withContext()
+
+                scope.launch {
                     onRequest(req, resp)
                     future.complete(this)
                 }
+
             }
         })
         bootstrap.setPort(port).start()
