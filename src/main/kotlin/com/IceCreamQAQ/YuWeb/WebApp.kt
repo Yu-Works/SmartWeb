@@ -68,6 +68,7 @@ class WebApp : ApplicationService {
                     session
                 }
 
+            context.putBean(WebServer::class.java,configName,configName)
             servers.add(server)
             server.start()
         }
