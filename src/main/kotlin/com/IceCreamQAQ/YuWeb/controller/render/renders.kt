@@ -1,22 +1,18 @@
 package com.IceCreamQAQ.YuWeb.controller.render
 
-import com.IceCreamQAQ.YuWeb.H
 import com.IceCreamQAQ.YuWeb.WebActionContext
-import com.IceCreamQAQ.YuWeb.WebServer
-import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
+import com.IceCreamQAQ.YuWeb.AbstractWebServer
 import java.lang.RuntimeException
 
 abstract class Render : RuntimeException() {
-    abstract fun doRender(context: WebActionContext, server: WebServer)
+    abstract fun doRender(context: WebActionContext, server: AbstractWebServer)
 }
 
 open class RenderText(private val text: String) : Render() {
 
     open val contentType = "text/plain"
 
-    override fun doRender(context: WebActionContext, server: WebServer) {
+    override fun doRender(context: WebActionContext, server: AbstractWebServer) {
         server.run {
             context.resultByString(text,contentType)
         }

@@ -1,7 +1,7 @@
 package com.IceCreamQAQ.YuWeb.server.shttp
 
 import com.IceCreamQAQ.YuWeb.H
-import com.IceCreamQAQ.YuWeb.WebServer
+import com.IceCreamQAQ.YuWeb.AbstractWebServer
 import com.alibaba.fastjson.JSONObject
 import kotlinx.coroutines.*
 import org.smartboot.http.common.enums.HttpStatus
@@ -18,9 +18,8 @@ import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 
-class SmartHTTPServer : WebServer() {
+class SmartHTTPServer : AbstractWebServer() {
 
     class SmartHttpScope(pool: CoroutineDispatcher) : CoroutineScope {
 

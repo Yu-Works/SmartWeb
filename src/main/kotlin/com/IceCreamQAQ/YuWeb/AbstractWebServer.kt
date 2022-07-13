@@ -1,5 +1,6 @@
 package com.IceCreamQAQ.YuWeb
 
+import com.IceCreamQAQ.SmartWeb.WebServer
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
 import com.IceCreamQAQ.Yu.controller.Router
 import com.IceCreamQAQ.Yu.toJSONObject
@@ -13,7 +14,7 @@ import java.lang.Exception
 import java.util.*
 import kotlin.collections.HashMap
 
-abstract class WebServer {
+abstract class AbstractWebServer : WebServer {
 
     companion object {
         val enableMethod = arrayOf("get", "post", "put", "delete")
@@ -26,44 +27,44 @@ abstract class WebServer {
     }
 
 
-    open fun self(block: () -> Unit): WebServer {
+    open fun self(block: () -> Unit): AbstractWebServer {
         block()
         return this
     }
 
     protected open lateinit var name: String
-    open fun name(name: String): WebServer = self {
+    open fun name(name: String): AbstractWebServer = self {
         this.name = name
     }
 
     protected open var isDev = false
-    open fun isDev(dev: Boolean): WebServer = self {
+    open fun isDev(dev: Boolean): AbstractWebServer = self {
         this.isDev = dev
     }
 
     protected open var port: Int = -1
-    open fun port(port: Int): WebServer = self {
+    open fun port(port: Int): AbstractWebServer = self {
         this.port = port
     }
 
     protected open lateinit var router: Router
-    open fun router(router: Router): WebServer = self {
+    open fun router(router: Router): AbstractWebServer = self {
         this.router = router
     }
 
     protected open lateinit var sessionCache: EhcacheHelp<H.Session>
-    open fun sessionCache(cache: EhcacheHelp<H.Session>): WebServer = self {
+    open fun sessionCache(cache: EhcacheHelp<H.Session>): AbstractWebServer = self {
         this.sessionCache = cache
     }
 
     protected open lateinit var createSession: () -> H.Session
-    open fun createSession(createSession: () -> H.Session): WebServer = self {
+    open fun createSession(createSession: () -> H.Session): AbstractWebServer = self {
         this.createSession = createSession
     }
 
     protected open var cors: Boolean = false
     protected open lateinit var corsDomain: Array<String>
-    open fun corsStr(corsStr: String?): WebServer = self {
+    open fun corsStr(corsStr: String?): AbstractWebServer = self {
         cors = corsStr != null
         corsDomain =
             if (cors) corsStr!!.split(",").map { it.trim() }.toTypedArray()
@@ -206,7 +207,7 @@ abstract class WebServer {
     }
 
     open fun WebActionContext.buildResult(obj: Any?) {
-        if (obj is Render) return obj.doRender(this, this@WebServer)
+        if (obj is Render) return obj.doRender(this, this@AbstractWebServer)
         invoker?.temple?.let {
             if (request.accept.mediaType[0] == "text/html") {
                 resultByString(it.invoke(this), "text/html")
@@ -233,6 +234,7 @@ abstract class WebServer {
                 }
                 resultByInputStream(FileInputStream(obj), contentType, obj.length())
             }
+
             else -> resultByString(jsonEncoder(request, response, JSON.toJSONString(obj)), "application/json")
         }
     }

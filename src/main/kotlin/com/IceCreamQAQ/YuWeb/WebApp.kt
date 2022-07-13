@@ -1,16 +1,15 @@
 package com.IceCreamQAQ.YuWeb
 
+import com.IceCreamQAQ.SmartWeb.WebServer
 import com.IceCreamQAQ.Yu.annotation.Config
 import com.IceCreamQAQ.Yu.`as`.ApplicationService
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
-import com.IceCreamQAQ.Yu.di.ConfigManager
 import com.IceCreamQAQ.Yu.di.ConfigManagerDefaultImpl
 import com.IceCreamQAQ.Yu.di.YuContext
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.collections.ArrayList
-import kotlin.properties.ReadOnlyProperty
 
 class WebApp : ApplicationService {
 
@@ -37,7 +36,7 @@ class WebApp : ApplicationService {
 
     }
 
-    private val servers = ArrayList<WebServer>()
+    private val servers = ArrayList<AbstractWebServer>()
     override fun start() {
         val rooters = controllerLoader.rootRouters
 
@@ -53,7 +52,7 @@ class WebApp : ApplicationService {
                 configManager.get(serverImplName, String::class.java) ?: defaultImpl
             )
 
-            val server = (context.newBean(serverImpl) as WebServer)
+            val server = (context.newBean(serverImpl) as AbstractWebServer)
                 .isDev(isDev)
                 .name(k)
                 .port(port)
@@ -68,7 +67,7 @@ class WebApp : ApplicationService {
                     session
                 }
 
-            context.putBean(WebServer::class.java,configName,configName)
+            context.putBean(WebServer::class.java, configName, configName)
             servers.add(server)
             server.start()
         }
