@@ -1,6 +1,9 @@
 package com.IceCreamQAQ.YuWeb.server.shttp
 
+import com.IceCreamQAQ.SmartWeb.websocket.WsAction
+import com.IceCreamQAQ.SmartWeb.websocket.WsContext
 import com.IceCreamQAQ.YuWeb.InternalWebServer
+import com.IceCreamQAQ.YuWeb.server.shttp.websocket.WsHandler
 import kotlinx.coroutines.*
 import org.smartboot.http.server.HttpBootstrap
 import org.smartboot.http.server.HttpRequest
@@ -60,11 +63,13 @@ class SmartHTTPServer : InternalWebServer() {
                             resp,
                             request.readBody(request.characterEncoding)
                         )
+
                         "application/xml" -> xmlDecoder(
                             req,
                             resp,
                             request.readBody(request.characterEncoding)
                         )
+
                         else -> null
                     }
                 }
@@ -85,6 +90,8 @@ class SmartHTTPServer : InternalWebServer() {
         bootstrap.webSocketHandler(wsHandler)
 
         bootstrap.setPort(port).start()
+
+
     }
 
     fun HttpRequest.readBody(charset: String = "UTF-8"): String {
@@ -103,6 +110,10 @@ class SmartHTTPServer : InternalWebServer() {
 
     override fun stop() {
         bootstrap.shutdown()
+    }
+
+    override fun createWsAction(path: String, action: WsAction) {
+        wsHandler.route(path, WsHandler(this, action))
     }
 
 }
