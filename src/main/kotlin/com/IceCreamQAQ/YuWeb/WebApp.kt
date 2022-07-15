@@ -63,6 +63,7 @@ class WebApp : ApplicationService {
                 .port(port)
                 .corsStr(cors)
                 .router(v)
+                .eventBus(eventBus)
                 .sessionCache(sessionCache)
                 .createSession {
                     val sid = UUID.randomUUID().toString()

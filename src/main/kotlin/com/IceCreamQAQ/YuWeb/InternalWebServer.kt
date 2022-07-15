@@ -3,6 +3,7 @@ package com.IceCreamQAQ.YuWeb
 import com.IceCreamQAQ.SmartWeb.WebServer
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
 import com.IceCreamQAQ.Yu.controller.Router
+import com.IceCreamQAQ.Yu.event.EventBus
 import com.IceCreamQAQ.Yu.toJSONObject
 import com.IceCreamQAQ.YuWeb.controller.render.Render
 import com.alibaba.fastjson.JSON
@@ -52,6 +53,11 @@ abstract class InternalWebServer : WebServer {
     protected open lateinit var router: Router
     open fun router(router: Router): InternalWebServer = self {
         this.router = router
+    }
+
+    protected open lateinit var eventBus: EventBus
+    open fun eventBus(eventBus: EventBus): InternalWebServer = self {
+        this.eventBus = eventBus
     }
 
     protected open lateinit var sessionCache: EhcacheHelp<H.Session>
