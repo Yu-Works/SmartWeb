@@ -36,7 +36,7 @@ class WebApp : ApplicationService {
 
     }
 
-    private val servers = ArrayList<AbstractWebServer>()
+    private val servers = ArrayList<InternalWebServer>()
     override fun start() {
         val rooters = controllerLoader.rootRouters
 
@@ -52,7 +52,7 @@ class WebApp : ApplicationService {
                 configManager.get(serverImplName, String::class.java) ?: defaultImpl
             )
 
-            val server = (context.newBean(serverImpl) as AbstractWebServer)
+            val server = (context.newBean(serverImpl) as InternalWebServer)
                 .isDev(isDev)
                 .name(k)
                 .port(port)

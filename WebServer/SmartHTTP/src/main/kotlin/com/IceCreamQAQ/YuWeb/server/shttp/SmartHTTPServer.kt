@@ -1,11 +1,12 @@
 package com.IceCreamQAQ.YuWeb.server.shttp
 
-import com.IceCreamQAQ.YuWeb.AbstractWebServer
+import com.IceCreamQAQ.YuWeb.InternalWebServer
 import kotlinx.coroutines.*
 import org.smartboot.http.server.HttpBootstrap
 import org.smartboot.http.server.HttpRequest
 import org.smartboot.http.server.HttpResponse
 import org.smartboot.http.server.HttpServerHandler
+import org.smartboot.http.server.handler.WebSocketRouteHandler
 import java.io.InputStreamReader
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.LinkedBlockingQueue
@@ -13,7 +14,7 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 
-class SmartHTTPServer : AbstractWebServer() {
+class SmartHTTPServer : InternalWebServer() {
 
     class SmartHttpScope(pool: CoroutineDispatcher) : CoroutineScope {
 
@@ -21,7 +22,7 @@ class SmartHTTPServer : AbstractWebServer() {
 
     }
 
-    private val pool = ThreadPoolExecutor(
+    val threadPool = ThreadPoolExecutor(
         Runtime.getRuntime().availableProcessors() * 2,
         Runtime.getRuntime().availableProcessors() * 2,
         60L,
@@ -29,7 +30,9 @@ class SmartHTTPServer : AbstractWebServer() {
         LinkedBlockingQueue()
     ).asCoroutineDispatcher()
 
-    val scope = SmartHttpScope(pool)
+    override val pool = SmartHttpScope(threadPool)
+
+    val wsHandler = WebSocketRouteHandler()
 
     private lateinit var bootstrap: HttpBootstrap
 
@@ -72,16 +75,17 @@ class SmartHTTPServer : AbstractWebServer() {
 
 //                withContext()
 
-                scope.launch {
+                pool.launch {
                     onRequest(req, resp)
                     future.complete(this)
                 }
 
             }
         })
+        bootstrap.webSocketHandler(wsHandler)
+
         bootstrap.setPort(port).start()
     }
-
 
     fun HttpRequest.readBody(charset: String = "UTF-8"): String {
         val bufferSize = 1024

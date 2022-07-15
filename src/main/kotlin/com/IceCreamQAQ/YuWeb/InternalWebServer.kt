@@ -8,13 +8,14 @@ import com.IceCreamQAQ.YuWeb.controller.render.Render
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
 import java.io.*
 import java.lang.Exception
 import java.util.*
 import kotlin.collections.HashMap
 
-abstract class AbstractWebServer : WebServer {
+abstract class InternalWebServer : WebServer {
 
     companion object {
         val enableMethod = arrayOf("get", "post", "put", "delete")
@@ -26,45 +27,46 @@ abstract class AbstractWebServer : WebServer {
         var xmlEncoder: (H.Request, H.Response, String) -> String = { _, _, it -> TODO() }
     }
 
+    abstract val pool: CoroutineScope
 
-    open fun self(block: () -> Unit): AbstractWebServer {
+    open fun self(block: () -> Unit): InternalWebServer {
         block()
         return this
     }
 
     protected open lateinit var name: String
-    open fun name(name: String): AbstractWebServer = self {
+    open fun name(name: String): InternalWebServer = self {
         this.name = name
     }
 
     protected open var isDev = false
-    open fun isDev(dev: Boolean): AbstractWebServer = self {
+    open fun isDev(dev: Boolean): InternalWebServer = self {
         this.isDev = dev
     }
 
     protected open var port: Int = -1
-    open fun port(port: Int): AbstractWebServer = self {
+    open fun port(port: Int): InternalWebServer = self {
         this.port = port
     }
 
     protected open lateinit var router: Router
-    open fun router(router: Router): AbstractWebServer = self {
+    open fun router(router: Router): InternalWebServer = self {
         this.router = router
     }
 
     protected open lateinit var sessionCache: EhcacheHelp<H.Session>
-    open fun sessionCache(cache: EhcacheHelp<H.Session>): AbstractWebServer = self {
+    open fun sessionCache(cache: EhcacheHelp<H.Session>): InternalWebServer = self {
         this.sessionCache = cache
     }
 
     protected open lateinit var createSession: () -> H.Session
-    open fun createSession(createSession: () -> H.Session): AbstractWebServer = self {
+    open fun createSession(createSession: () -> H.Session): InternalWebServer = self {
         this.createSession = createSession
     }
 
     protected open var cors: Boolean = false
     protected open lateinit var corsDomain: Array<String>
-    open fun corsStr(corsStr: String?): AbstractWebServer = self {
+    open fun corsStr(corsStr: String?): InternalWebServer = self {
         cors = corsStr != null
         corsDomain =
             if (cors) corsStr!!.split(",").map { it.trim() }.toTypedArray()
@@ -207,7 +209,7 @@ abstract class AbstractWebServer : WebServer {
     }
 
     open fun WebActionContext.buildResult(obj: Any?) {
-        if (obj is Render) return obj.doRender(this, this@AbstractWebServer)
+        if (obj is Render) return obj.doRender(this, this@InternalWebServer)
         invoker?.temple?.let {
             if (request.accept.mediaType[0] == "text/html") {
                 resultByString(it.invoke(this), "text/html")
