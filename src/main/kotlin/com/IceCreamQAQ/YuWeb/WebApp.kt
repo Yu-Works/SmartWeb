@@ -1,11 +1,13 @@
 package com.IceCreamQAQ.YuWeb
 
 import com.IceCreamQAQ.SmartWeb.WebServer
+import com.IceCreamQAQ.SmartWeb.event.WebServerStatusChangedEvent
 import com.IceCreamQAQ.Yu.annotation.Config
 import com.IceCreamQAQ.Yu.`as`.ApplicationService
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
 import com.IceCreamQAQ.Yu.di.ConfigManagerDefaultImpl
 import com.IceCreamQAQ.Yu.di.YuContext
+import com.IceCreamQAQ.Yu.event.EventBus
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Named
@@ -31,6 +33,9 @@ class WebApp : ApplicationService {
 
     @Config("yu.web.server.default")
     private lateinit var defaultImpl: String
+
+    @Inject
+    private lateinit var eventBus: EventBus
 
     override fun init() {
 
@@ -70,11 +75,13 @@ class WebApp : ApplicationService {
             context.putBean(WebServer::class.java, configName, configName)
             servers.add(server)
             server.start()
+            eventBus.post(WebServerStatusChangedEvent.Started(server))
         }
     }
 
     override fun stop() {
         for (server in servers) {
+            eventBus.post(WebServerStatusChangedEvent.Stopping(server))
             server.stop()
         }
     }
