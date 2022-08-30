@@ -76,10 +76,6 @@ class SmartHTTPServer : InternalWebServer() {
 
                 req.session = findSession(req.cookie("YuSid")?.value, resp)
 
-//                pool.interceptContinuation()
-
-//                withContext()
-
                 pool.launch {
                     onRequest(req, resp)
                     future.complete(this)
