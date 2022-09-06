@@ -1,4 +1,4 @@
-rootProject.name = "WebCore"
+rootProject.name = "SmartWeb"
 
 fun includeProject(name: String, dir: String? = null){
     include(name)

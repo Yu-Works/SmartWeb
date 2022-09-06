@@ -7,12 +7,12 @@ val coreVersion = "Yu-Core:0.2.0.0-DEV23"
 
 
 allprojects {
-    version = "0.0.2.0-DEV24"
+    version = "0.0.2.0-DEV25-TestBuild2"
     val dir = projectDir.absolutePath.split(File.separator)
     val l2 = dir[dir.size - 2]
-    group = if (name == "WebCore") "com.IceCreamQAQ.Yu"
-    else if (l2 == "TempleEngine") "com.IceCreamQAQ.Yu.WebCore.Temple"
-    else if (l2 == "WebServer") "com.IceCreamQAQ.Yu.WebCore.Server"
+    group = if (name == "SmartWeb") "com.IceCreamQAQ"
+    else if (l2 == "TempleEngine") "com.IceCreamQAQ.SmartWeb.Temple"
+    else if (l2 == "WebServer") "com.IceCreamQAQ.SmartWeb.Server"
     else "com.IceCreamQAQ.Yu.WebCore"
 
     repositories {
