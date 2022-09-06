@@ -28,5 +28,8 @@ val defaultFileContentType = hashMapOf(
     "js" to "application/x-javascript",
     "css" to "text/css",
     "html" to "text/html",
+
+    // 其他资源
+    "txt" to "text/plain"
 //    "" to "",
 )
