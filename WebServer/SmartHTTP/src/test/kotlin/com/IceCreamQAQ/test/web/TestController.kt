@@ -50,6 +50,9 @@ class TestController {
             println(it)
             send("你发送的是: $it。")
 
+            attachment?.let { send("您上次发送的是: ${attachment}。") }
+
+            attachment = it
             if (it == "999") sendToAll("转发到全部人: 999！")
         }
         handShake {
