@@ -1,7 +1,11 @@
 package com.IceCreamQAQ.test.web
 
+import com.IceCreamQAQ.SmartWeb.annotation.NewWs
 import com.IceCreamQAQ.SmartWeb.event.WebServerStatusChangedEvent
+import com.IceCreamQAQ.SmartWeb.websocket.WsAction
+import com.IceCreamQAQ.SmartWeb.websocket.kotlin.KWsActionCreator
 import com.IceCreamQAQ.SmartWeb.websocket.kotlin.KWsActionCreator.Companion.newWs
+import com.IceCreamQAQ.SmartWeb.websocket.kotlin.newWs
 import com.IceCreamQAQ.Yu.annotation.Action
 import com.IceCreamQAQ.Yu.annotation.Catch
 import com.IceCreamQAQ.Yu.annotation.Event
@@ -9,6 +13,7 @@ import com.IceCreamQAQ.Yu.annotation.EventListener
 import com.IceCreamQAQ.Yu.toJSONString
 import com.IceCreamQAQ.YuWeb.H
 import com.IceCreamQAQ.YuWeb.annotation.WebController
+import com.IceCreamQAQ.YuWeb.server.shttp.websocket.WsHandler
 import com.IceCreamQAQ.YuWeb.validation.Max
 import com.IceCreamQAQ.YuWeb.validation.Min
 import com.IceCreamQAQ.YuWeb.validation.Valid
@@ -36,22 +41,19 @@ data class Entity2(
 
 annotation class Permission(val value: String)
 
-@EventListener
 @WebController
 class TestController {
 
-    @Event
-    fun onWebServerStart(e: WebServerStatusChangedEvent.Started) {
-        e.server.newWs("/hello") {
-            handleText {
-                println(it)
-                send("你发送的是: $it。")
+    @NewWs("/hello")
+    fun onWebServerStart() = newWs {
+        handleText {
+            println(it)
+            send("你发送的是: $it。")
 
-                if (it == "999") sendToAll("转发到全部人: 999！")
-            }
-            handShake {
-                send("欢迎链接。")
-            }
+            if (it == "999") sendToAll("转发到全部人: 999！")
+        }
+        handShake {
+            send("欢迎链接。")
         }
     }
 

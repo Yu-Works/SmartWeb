@@ -4,6 +4,8 @@ import com.IceCreamQAQ.SmartWeb.WebServer
 import com.IceCreamQAQ.SmartWeb.websocket.WsSession
 import com.IceCreamQAQ.YuWeb.InternalWebServer
 
+fun newWs(create: KWsActionCreator.() -> Unit):KWsActionCreator = KWsActionCreator().apply(create)
+
 class KWsActionCreator {
 
     companion object {

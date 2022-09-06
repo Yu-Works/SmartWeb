@@ -2,6 +2,7 @@ package com.IceCreamQAQ.YuWeb
 
 import com.IceCreamQAQ.SmartWeb.WebServer
 import com.IceCreamQAQ.SmartWeb.event.WebServerStatusChangedEvent
+import com.IceCreamQAQ.SmartWeb.websocket.kotlin.KWsActionCreator.Companion.newWs
 import com.IceCreamQAQ.Yu.annotation.Config
 import com.IceCreamQAQ.Yu.`as`.ApplicationService
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
@@ -62,7 +63,7 @@ class WebApp : ApplicationService {
                 .name(k)
                 .port(port)
                 .corsStr(cors)
-                .router(v)
+                .router(v.router)
                 .eventBus(eventBus)
                 .sessionCache(sessionCache)
                 .createSession {
@@ -72,6 +73,9 @@ class WebApp : ApplicationService {
                     sessionCache[psId] = session
                     session
                 }
+
+            v.wsList.forEach { server.createWsAction(it.first, it.second) }
+            v.kwsList.forEach { server.createWsAction(it.first, it.second.build(server)) }
 
             context.putBean(WebServer::class.java, configName, configName)
             servers.add(server)

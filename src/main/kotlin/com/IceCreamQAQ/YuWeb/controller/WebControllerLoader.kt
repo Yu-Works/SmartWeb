@@ -1,5 +1,9 @@
 package com.IceCreamQAQ.YuWeb
 
+import com.IceCreamQAQ.SmartWeb.annotation.NewWs
+import com.IceCreamQAQ.SmartWeb.websocket.WsAction
+import com.IceCreamQAQ.SmartWeb.websocket.kotlin.KWsActionCreator
+import com.IceCreamQAQ.Yu.annotation
 import com.IceCreamQAQ.Yu.annotation.After
 import com.IceCreamQAQ.Yu.annotation.Before
 import com.IceCreamQAQ.Yu.annotation.Config
@@ -11,6 +15,7 @@ import com.IceCreamQAQ.Yu.isBean
 import com.IceCreamQAQ.Yu.loader.LoadItem
 import com.IceCreamQAQ.YuWeb.controller.WebActionInvoker
 import com.IceCreamQAQ.YuWeb.controller.WebReflectMethodInvoker
+import com.IceCreamQAQ.YuWeb.controller.WebRootRouter
 import com.IceCreamQAQ.YuWeb.temple.TempleEngine
 import com.IceCreamQAQ.YuWeb.validation.ValidatorFactory
 import java.lang.reflect.Method
@@ -30,7 +35,7 @@ class WebControllerLoader : DefaultControllerLoaderImpl() {
     @Inject
     private var templeEngine: TempleEngine? = null
 
-    val rootRouters = HashMap<String, Router>()
+    val rootRouters = HashMap<String, WebRootRouter>()
 
     @Config("web.temple.impl")
     @Default("")
@@ -53,20 +58,36 @@ class WebControllerLoader : DefaultControllerLoaderImpl() {
 //
 //            controllerToRouter(context[clazz] ?: continue, rootRouter)
 //        }
-        val rootRouters = HashMap<String, RootRouter>()
+//        val rootRouters = HashMap<String, WebRootRouter>()
         for (item in items.values) {
             if (!item.type.isBean()) continue
             val clazz = item.type
             val name = clazz.getAnnotation(Named::class.java)?.value
                 ?: item.loadBy::class.java.interfaces[0].getAnnotation(Named::class.java)?.value ?: ""
-            val rootRouter = rootRouters.getOrPut(name) { RootRouter() }
+            val rootRouter = rootRouters.getOrPut(name) { WebRootRouter() }
 
-            controllerToRouter(clazz,context[clazz] ?: continue, rootRouter)
+            val instance = context[clazz] ?: continue
+            controllerToRouter(clazz, instance, rootRouter)
+            controllerFindWs(clazz, instance, rootRouter)
         }
 
         for ((k, v) in rootRouters) {
             v.router.init(v)
-            this.rootRouters[k] = v.router
+            this.rootRouters[k] = v
+        }
+    }
+
+    fun controllerFindWs(controllerClass: Class<*>, instance: Any, rootRouter: WebRootRouter) {
+        controllerClass.methods.forEach {
+            it.annotation<NewWs> {
+                if (it.parameters.isEmpty())
+                    it.invoke(instance).also { r ->
+                        when(r){
+                            is WsAction -> rootRouter.wsList.add(value to r)
+                            is KWsActionCreator -> rootRouter.kwsList.add(value to r)
+                        }
+                    }
+            }
         }
     }
 
