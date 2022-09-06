@@ -7,6 +7,8 @@ interface WsSession {
     val req: WsReq
     val resp: WsResp
 
+    var attachment: Any?
+
     var name: String?
     var group: String?
 

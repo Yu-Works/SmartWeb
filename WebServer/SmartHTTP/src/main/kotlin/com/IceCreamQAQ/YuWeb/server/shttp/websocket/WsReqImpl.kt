@@ -4,7 +4,7 @@ import com.IceCreamQAQ.SmartWeb.websocket.WsReq
 import org.smartboot.http.server.WebSocketRequest
 import java.net.InetSocketAddress
 
-class WsReqImpl(private val real: WebSocketRequest) : WsReq {
+class WsReqImpl(internal val real: WebSocketRequest) : WsReq {
 
     override val frameOpcode: Int
         get() = real.frameOpcode
