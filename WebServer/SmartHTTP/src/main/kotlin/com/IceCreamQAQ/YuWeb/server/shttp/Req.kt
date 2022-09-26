@@ -1,7 +1,7 @@
 package com.IceCreamQAQ.YuWeb.server.shttp
 
 import com.IceCreamQAQ.YuWeb.H
-import com.alibaba.fastjson.JSONObject
+import com.alibaba.fastjson2.JSONObject
 import org.smartboot.http.server.HttpRequest
 import java.io.InputStream
 import java.net.InetSocketAddress

@@ -12,8 +12,8 @@ import com.IceCreamQAQ.YuWeb.annotation.RequestBody
 import com.IceCreamQAQ.YuWeb.annotation.RequestParameter
 import com.IceCreamQAQ.YuWeb.toParaName
 import com.IceCreamQAQ.YuWeb.validation.*
-import com.alibaba.fastjson.JSON
-import com.alibaba.fastjson.util.TypeUtils
+import com.alibaba.fastjson2.JSON
+import com.alibaba.fastjson2.util.TypeUtils
 import java.lang.reflect.Method
 import javax.inject.Named
 import kotlin.reflect.KFunction
@@ -329,7 +329,7 @@ class WebReflectMethodInvoker(
             } else
                 if (q::class.java.isArray)
                     if (clazz.isAssignableFrom(q::class.java)) return (q as Array<*>).let { if (it.isNotEmpty()) it[0] else null }
-            return TypeUtils.castToJavaBean(q, clazz)
+            return TypeUtils.cast(q, clazz)
         }
         return if (
             !mp.isPara &&

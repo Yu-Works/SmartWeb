@@ -6,9 +6,9 @@ import com.IceCreamQAQ.Yu.controller.Router
 import com.IceCreamQAQ.Yu.event.EventBus
 import com.IceCreamQAQ.Yu.toJSONObject
 import com.IceCreamQAQ.YuWeb.controller.render.Render
-import com.alibaba.fastjson.JSON
-import com.alibaba.fastjson.JSONArray
-import com.alibaba.fastjson.JSONObject
+import com.alibaba.fastjson2.JSON
+import com.alibaba.fastjson2.JSONArray
+import com.alibaba.fastjson2.JSONObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
 import java.io.*
@@ -80,9 +80,8 @@ abstract class InternalWebServer : WebServer {
     }
 
     open fun findSession(id: String?, resp: H.Response): H.Session {
-        val sid = id ?: UUID.randomUUID().toString().let { resp.addCookie(H.Cookie("YuSid", it, true)) }
-        val psId = "${port}_$sid"
-        return sessionCache.getOrPut("${port}_$sid", H.Session(psId, HashMap()))
+        val sid = id ?: UUID.randomUUID().toString().also { resp.addCookie(H.Cookie("YuSid", it, true)) }
+        return sessionCache.getOrPut(sid, H.Session(sid, HashMap()))
     }
 
     abstract fun start()

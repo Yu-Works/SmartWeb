@@ -1,6 +1,6 @@
 package com.IceCreamQAQ.YuWeb
 
-import com.alibaba.fastjson.JSONObject
+import com.alibaba.fastjson2.JSONObject
 import java.io.InputStream
 import java.io.OutputStream
 import java.lang.StringBuilder
