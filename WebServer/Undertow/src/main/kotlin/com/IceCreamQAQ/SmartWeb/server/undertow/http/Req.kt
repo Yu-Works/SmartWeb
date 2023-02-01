@@ -1,7 +1,7 @@
 package com.IceCreamQAQ.SmartWeb.server.undertow.http
 
 import com.IceCreamQAQ.YuWeb.H
-import com.alibaba.fastjson.JSONObject
+import com.alibaba.fastjson2.JSONObject
 import io.undertow.server.HttpServerExchange
 import java.io.InputStream
 import java.net.InetSocketAddress
