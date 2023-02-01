@@ -5,8 +5,8 @@ import com.IceCreamQAQ.SmartWeb.event.WebServerStatusChangedEvent
 import com.IceCreamQAQ.Yu.annotation.Config
 import com.IceCreamQAQ.Yu.`as`.ApplicationService
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
-import com.IceCreamQAQ.Yu.di.ConfigManagerDefaultImpl
 import com.IceCreamQAQ.Yu.di.YuContext
+import com.IceCreamQAQ.Yu.di.config.ConfigManager
 import com.IceCreamQAQ.Yu.event.EventBus
 import java.util.*
 import javax.inject.Inject
@@ -22,7 +22,7 @@ class WebApp : ApplicationService {
     private lateinit var controllerLoader: WebControllerLoader
 
     @Inject
-    private lateinit var configManager: ConfigManagerDefaultImpl
+    private lateinit var configManager: ConfigManager
 
     @Inject
     @field:Named("WebSession")
@@ -51,10 +51,10 @@ class WebApp : ApplicationService {
             val serverImplName = if (k == "") "webServer.impl" else "webServer.$k.impl"
 
             val port =
-                configManager.get(configName, String::class.java)?.toInt() ?: error("No Server: $k's Port Config!")
-            val cors = configManager.get(corsName, String::class.java)
+                configManager.getConfig(configName, String::class.java)?.toInt() ?: error("No Server: $k's Port Config!")
+            val cors = configManager.getConfig(corsName, String::class.java)
             val serverImpl = Class.forName(
-                configManager.get(serverImplName, String::class.java) ?: defaultImpl
+                configManager.getConfig(serverImplName, String::class.java) ?: defaultImpl
             )
 
             val server = (context.newBean(serverImpl) as InternalWebServer)
@@ -73,7 +73,7 @@ class WebApp : ApplicationService {
                     session
                 }
 
-            context.putBean(WebServer::class.java, configName, configName)
+            context.putBean(WebServer::class.java, configName, server)
             servers.add(server)
             server.start()
             eventBus.post(WebServerStatusChangedEvent.Started(server))

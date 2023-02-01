@@ -6,9 +6,9 @@ import com.IceCreamQAQ.Yu.controller.Router
 import com.IceCreamQAQ.Yu.event.EventBus
 import com.IceCreamQAQ.Yu.toJSONObject
 import com.IceCreamQAQ.YuWeb.controller.render.Render
-import com.alibaba.fastjson.JSON
-import com.alibaba.fastjson.JSONArray
-import com.alibaba.fastjson.JSONObject
+import com.alibaba.fastjson2.JSON
+import com.alibaba.fastjson2.JSONArray
+import com.alibaba.fastjson2.JSONObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
 import java.io.*

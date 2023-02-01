@@ -2,12 +2,12 @@ plugins {
     java
     kotlin("jvm") version "1.7.10"
 }
-val coreVersion = "Yu-Core:0.2.0.0-DEV23"
+val coreVersion = "Yu-Core:0.3.0.DEV.1"
 
 
 
 allprojects {
-    version = "0.0.2.0-DEV26"
+    version = "0.0.2.0-DEV26.D"
     val dir = projectDir.absolutePath.split(File.separator)
     val l2 = dir[dir.size - 2]
     group = if (name == "SmartWeb") "com.IceCreamQAQ"
@@ -85,6 +85,7 @@ allprojects {
 
 dependencies {
     implementation(kotlin("stdlib"))
+    api("com.alibaba.fastjson2:fastjson2:2.0.23")
 }
 
 
