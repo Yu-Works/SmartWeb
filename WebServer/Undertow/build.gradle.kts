@@ -4,5 +4,5 @@ plugins {
 
 dependencies{
     api(rootProject)
-    api("io.undertow:undertow-core:2.2.18.Final")
+    api("io.undertow:undertow-core:2.3.3.Final")
 }
