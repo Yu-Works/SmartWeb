@@ -48,15 +48,16 @@ class WebControllerLoader : DefaultControllerLoaderImpl() {
             }
         }
 
-        val rootRouters = HashMap<String, RootRouter>()
+        val rootRouters = HashMap<String, WebRootRouter>()
         for (item in items) {
             if (!item.clazz.isBean()) continue
             val clazz = item.clazz
             val name = clazz.getAnnotation(Named::class.java)?.value
                 ?: item.target.interfaces[0].getAnnotation(Named::class.java)?.value ?: ""
-            val rootRouter = rootRouters.getOrPut(name) { RootRouter() }
+            val rootRouter = rootRouters.getOrPut(name) { WebRootRouter() }
 
-            controllerToRouter(clazz, context[clazz] ?: continue, rootRouter)
+            val instance = context[clazz] ?: continue
+            controllerToRouter(clazz, instance, rootRouter)
             controllerFindWs(clazz, instance, rootRouter)
         }
 

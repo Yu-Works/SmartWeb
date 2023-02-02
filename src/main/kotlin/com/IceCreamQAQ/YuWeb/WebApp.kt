@@ -55,7 +55,7 @@ class WebApp : ApplicationService {
                     String::class.java,
                     Any::class.java,
                     ResourcePoolsBuilder.heap(
-                        configManager.get(
+                        configManager.getConfig(
                             if (it == "") "webServer.sessionNum" else "webServer.$it.sessionNum",
                             String::class.java
                         )?.toLong() ?: 2000
@@ -72,7 +72,8 @@ class WebApp : ApplicationService {
             val serverImplName = if (k == "") "webServer.impl" else "webServer.$k.impl"
 
             val port =
-                configManager.getConfig(configName, String::class.java)?.toInt() ?: error("No Server: $k's Port Config!")
+                configManager.getConfig(configName, String::class.java)?.toInt()
+                    ?: error("No Server: $k's Port Config!")
             val cors = configManager.getConfig(corsName, String::class.java)
             val serverImpl = Class.forName(
                 configManager.getConfig(serverImplName, String::class.java) ?: defaultImpl
