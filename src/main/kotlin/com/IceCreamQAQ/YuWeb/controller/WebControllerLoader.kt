@@ -31,20 +31,22 @@ class WebControllerLoader : DefaultControllerLoaderImpl() {
     val rootRouters = HashMap<String, Router>()
 
     @Config("web.temple.impl")
-    @Default("")
-    private lateinit var impl: String
+    private val impl: String? = null
 
     override fun load(items: Collection<LoadItem>) {
-        context.getBean(TempleEngine::class.java, impl)?.let {
-            it.start("dev")
-            templeEngine = it
+        impl?.let {
+            context.getBean(TempleEngine::class.java, impl)?.let {
+                it.start("dev")
+                templeEngine = it
+            }
         }
+
         val rootRouters = HashMap<String, RootRouter>()
         for (item in items) {
             if (!item.clazz.isBean()) continue
             val clazz = item.clazz
             val name = clazz.getAnnotation(Named::class.java)?.value
-                ?: item.loadByAnnotation::class.java.interfaces[0].getAnnotation(Named::class.java)?.value ?: ""
+                ?: item.target.interfaces[0].getAnnotation(Named::class.java)?.value ?: ""
             val rootRouter = rootRouters.getOrPut(name) { RootRouter() }
 
             controllerToRouter(clazz, context[clazz] ?: continue, rootRouter)

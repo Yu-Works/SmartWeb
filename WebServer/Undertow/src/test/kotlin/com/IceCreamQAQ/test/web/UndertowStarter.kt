@@ -1,7 +1,8 @@
 package com.IceCreamQAQ.test.web
 
-import com.IceCreamQAQ.Yu.DefaultStarter
+import com.IceCreamQAQ.Yu.FullStackApplicationLauncher
+
 
 fun main() {
-    DefaultStarter.start()
+    FullStackApplicationLauncher.launch()
 }
