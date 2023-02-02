@@ -10,7 +10,7 @@ import com.IceCreamQAQ.Yu.annotation.Config
 import com.IceCreamQAQ.Yu.annotation.Default
 import com.IceCreamQAQ.Yu.controller.*
 import com.IceCreamQAQ.Yu.di.YuContext
-import com.IceCreamQAQ.Yu.fullName
+import com.IceCreamQAQ.Yu.di.YuContext.Companion.get
 import com.IceCreamQAQ.Yu.isBean
 import com.IceCreamQAQ.Yu.loader.LoadItem
 import com.IceCreamQAQ.YuWeb.controller.WebActionInvoker
@@ -38,36 +38,25 @@ class WebControllerLoader : DefaultControllerLoaderImpl() {
     val rootRouters = HashMap<String, WebRootRouter>()
 
     @Config("web.temple.impl")
-    @Default("")
-    private lateinit var impl: String
+    private val impl: String? = null
 
-    override fun load(items: Map<String, LoadItem>) {
-        context.getBean(TempleEngine::class.java, impl)?.let {
-            it.start("dev")
-            templeEngine = it
+    override fun load(items: Collection<LoadItem>) {
+        impl?.let {
+            context.getBean(TempleEngine::class.java, impl)?.let {
+                it.start("dev")
+                templeEngine = it
+            }
         }
-//        for (item in items.values) {
-//            val clazz = item.type
-//            val name = clazz.getAnnotation(Named::class.java)?.value
-//                    ?: item.type::class.java.interfaces[0].getAnnotation(Named::class.java)?.value ?: ""
-//            val rootRouter = rootRouters[name] ?: {
-//                val r = NewRouterImpl(0)
-//                rootRouters[name] = r
-//                r
-//            }()
-//
-//            controllerToRouter(context[clazz] ?: continue, rootRouter)
-//        }
-//        val rootRouters = HashMap<String, WebRootRouter>()
-        for (item in items.values) {
-            if (!item.type.isBean()) continue
-            val clazz = item.type
-            val name = clazz.getAnnotation(Named::class.java)?.value
-                ?: item.loadBy::class.java.interfaces[0].getAnnotation(Named::class.java)?.value ?: ""
-            val rootRouter = rootRouters.getOrPut(name) { WebRootRouter() }
 
-            val instance = context[clazz] ?: continue
-            controllerToRouter(clazz, instance, rootRouter)
+        val rootRouters = HashMap<String, RootRouter>()
+        for (item in items) {
+            if (!item.clazz.isBean()) continue
+            val clazz = item.clazz
+            val name = clazz.getAnnotation(Named::class.java)?.value
+                ?: item.target.interfaces[0].getAnnotation(Named::class.java)?.value ?: ""
+            val rootRouter = rootRouters.getOrPut(name) { RootRouter() }
+
+            controllerToRouter(clazz, context[clazz] ?: continue, rootRouter)
             controllerFindWs(clazz, instance, rootRouter)
         }
 

@@ -2,7 +2,7 @@ plugins {
     java
     kotlin("jvm") version "1.7.10"
 }
-val coreVersion = "Yu-Core:0.2.0.0-DEV26"
+val coreVersion = "Yu-Core:0.3.0.DEV.1"
 
 
 

@@ -1,6 +1,7 @@
 package com.IceCreamQAQ.YuWeb.validation
 
 import com.IceCreamQAQ.Yu.di.YuContext
+import com.IceCreamQAQ.Yu.di.YuContext.Companion.get
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
