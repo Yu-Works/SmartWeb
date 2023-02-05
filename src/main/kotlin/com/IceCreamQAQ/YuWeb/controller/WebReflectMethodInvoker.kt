@@ -5,6 +5,8 @@ import com.IceCreamQAQ.Yu.annotation.Default
 import com.IceCreamQAQ.Yu.controller.ActionContext
 import com.IceCreamQAQ.Yu.controller.MethodInvoker
 import com.IceCreamQAQ.Yu.toObject
+import com.IceCreamQAQ.Yu.validation.ValidateData
+import com.IceCreamQAQ.Yu.validation.ValidateFailException
 import com.IceCreamQAQ.YuWeb.H
 import com.IceCreamQAQ.YuWeb.WebActionContext
 import com.IceCreamQAQ.YuWeb.annotation.Output
@@ -24,7 +26,7 @@ class WebReflectMethodInvoker(
     private val method: Method,
     val instance: Any,
     level: Int? = null,
-    factory: ValidatorFactory
+//    factory: ValidatorFactory
 ) : MethodInvoker {
 
     data class MethodPara(
@@ -72,12 +74,12 @@ class WebReflectMethodInvoker(
 //
 //            }
             val vds = arrayListOf<ValidateData>()
-            para.type.getAnnotation(Valid::class.java)?.let { vds.add(ValidateData(it, factory[para.type])) }
-
-            for (annotation in para.annotations) {
-                val vb = annotation::class.java.interfaces[0].getAnnotation(ValidateBy::class.java) ?: continue
-                vds.add(ValidateData(annotation, factory[vb.value]))
-            }
+//            para.type.getAnnotation(Valid::class.java)?.let { vds.add(ValidateData(it, factory[para.type])) }
+//
+//            for (annotation in para.annotations) {
+//                val vb = annotation::class.java.interfaces[0].getAnnotation(ValidateBy::class.java) ?: continue
+//                vds.add(ValidateData(annotation, factory[vb.value]))
+//            }
 
             fun buildMP(
                 type: Int,
@@ -252,7 +254,7 @@ class WebReflectMethodInvoker(
             mp.vds?.let {
                 for (vd in it) {
                     vd.validator.validate(vd.annotation, p)
-                        ?.run { throw ValidateFailException(className, methodName, mp.name, this) }
+                        ?.run { throw ValidateFailException(methodName, mp.name, this) }
                 }
             }
             p?.let { if (mp.isSaved) context[mp.name] = it }
