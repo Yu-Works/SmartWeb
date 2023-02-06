@@ -4,5 +4,5 @@ plugins {
 
 dependencies{
     implementation(project(":SmartHTTP"))
-    api("org.rythmengine:rythm-engine:1.4.1")
+    api("org.rythmengine:rythm-engine:1.4.2")
 }
