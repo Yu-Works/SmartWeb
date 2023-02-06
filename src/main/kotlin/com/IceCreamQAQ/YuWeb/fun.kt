@@ -13,10 +13,10 @@ fun file(vararg names: String): File? {
 
 val defaultFileContentType = hashMapOf(
     // 图片资源
-    "png" to "mage/png",
+    "png" to "image/png",
     "gif" to "image/gif",
-    "jpg" to "mage/jpeg",
-    "jpeg" to "mage/jpeg",
+    "jpg" to "image/jpeg",
+    "jpeg" to "image/jpeg",
 
     // 音频资源
     "mp3" to "audio/mp3",
