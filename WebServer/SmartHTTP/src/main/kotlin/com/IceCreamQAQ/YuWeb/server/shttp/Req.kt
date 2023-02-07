@@ -22,7 +22,7 @@ class Req(private val request: HttpRequest) : H.Request {
         }
     }.toTypedArray()
     override val contentType: String
-        get() = request.contentType.split(";")[0].trim()
+        get() = (request.contentType ?: "").split(";")[0].trim()
     override val charset: String
         get() = request.characterEncoding
     override val queryString: String
