@@ -13,8 +13,11 @@ class RythmTempleEngine : TempleEngine {
 
     private lateinit var engine: RythmEngine
 
+    private var isDev = false
+
     override fun start(mode: String) {
         engine = RythmEngine(mapOf("engine.mode" to if (mode == "dev") Rythm.Mode.dev else Rythm.Mode.prod))
+        if (mode == "dev") isDev = true
     }
 
     override fun close() {
@@ -24,10 +27,13 @@ class RythmTempleEngine : TempleEngine {
     override fun getTemple(path: String): Temple? {
         return RythmTemple(
             engine,
-            File(
-                Thread.currentThread().contextClassLoader.getResource("rythm/$path.html")?.toURI()
-                    ?: return null
-            )
+            if (isDev)
+                File("src/main/resources/rythm/$path.html").let { if (it.exists()) it else null } ?: return null
+            else
+                File(
+                    Thread.currentThread().contextClassLoader.getResource("rythm/$path.html")?.toURI()
+                        ?: return null
+                )
         )
     }
 

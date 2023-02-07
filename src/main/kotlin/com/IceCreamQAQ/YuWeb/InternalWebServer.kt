@@ -139,9 +139,13 @@ abstract class InternalWebServer : WebServer {
 
         if (!context.success) {
             if (path.startsWith("/asset/"))
-                this::class.java.classLoader
-                    .getResource(path.substring(1))
-                    ?.let { result = File(it.file) }
+                let {
+                    if (isDev)
+                        File("src/main/resources$path").let { if (it.exists()) it else null }
+                    else
+                        this::class.java.classLoader
+                            .getResource(path.substring(1))?.let { File(it.file) }
+                }?.let { result = it }
             if (result == null) {
                 resp.status = 404
                 return
