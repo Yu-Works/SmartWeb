@@ -37,13 +37,13 @@ class WebControllerLoader : DefaultControllerLoaderImpl() {
     val rootRouters = HashMap<String, WebRootRouter>()
 
     @Config("web.temple.impl")
-    private val impl: String? = null
+    private var impl: String? = null
 
     override fun load(items: Collection<LoadItem>) {
         impl?.let {
-            context.getBean(TempleEngine::class.java, impl)?.let {
-                it.start("dev")
-                templeEngine = it
+            context.getBean(TempleEngine::class.java, it)?.let {engine ->
+                engine.start("dev")
+                templeEngine = engine
             }
         }
 
