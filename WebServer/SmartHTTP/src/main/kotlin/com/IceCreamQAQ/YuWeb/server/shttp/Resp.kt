@@ -35,7 +35,7 @@ class Resp(val response: HttpResponse) : H.Response {
 
     override fun write() {
         response.characterEncoding = this.charset
-        this.contentType?.let { response.setContentType(it) }
+        this.contentType?.let { response.contentType = it }
 
         headers.forEach { response.addHeader(it.name, it.value) }
         cookies.forEach { response.addHeader("Set-Cookie", it.toCookieString()) }

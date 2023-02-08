@@ -50,10 +50,11 @@ class SmartHTTPServer : InternalWebServer() {
                 if (req.method != "get" && req.method != "head") {
 
                     if (req.contentType.contains("multipart/form-data")) {
-                        val bound = req.contentType.split("boundary=")[1].trim()
+                        val bound = request.contentType.split("boundary=")[1].trim()
 
-                        val input = req.inputStream!!
+                        val input = request.inputStream!!
 //                        input.buffered().re
+                        println(bound)
                         println(request.readBody())
                     }
 

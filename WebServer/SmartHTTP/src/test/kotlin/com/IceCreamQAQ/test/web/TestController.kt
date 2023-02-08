@@ -14,10 +14,10 @@ import com.IceCreamQAQ.Yu.toJSONString
 import com.IceCreamQAQ.YuWeb.H
 import com.IceCreamQAQ.YuWeb.annotation.WebController
 import com.IceCreamQAQ.YuWeb.server.shttp.websocket.WsHandler
-import com.IceCreamQAQ.YuWeb.validation.Max
-import com.IceCreamQAQ.YuWeb.validation.Min
-import com.IceCreamQAQ.YuWeb.validation.Valid
-import com.IceCreamQAQ.YuWeb.validation.ValidateFailException
+import com.IceCreamQAQ.Yu.validation.Max
+import com.IceCreamQAQ.Yu.validation.Min
+import com.IceCreamQAQ.Yu.validation.Valid
+import com.IceCreamQAQ.Yu.validation.ValidateFailException
 import java.io.File
 import java.io.FileInputStream
 import java.lang.Exception
