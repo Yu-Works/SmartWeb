@@ -25,16 +25,14 @@ class RythmTempleEngine : TempleEngine {
     }
 
     override fun getTemple(path: String): Temple? {
-        return RythmTemple(
-            engine,
-            if (isDev)
-                File("src/main/resources/rythm/$path.html").let { if (it.exists()) it else null } ?: return null
-            else
-                File(
-                    Thread.currentThread().contextClassLoader.getResource("rythm/$path.html")?.toURI()
-                        ?: return null
-                )
-        )
+        return if (isDev)
+            RythmTemple(engine, File("src/main/resources/rythm/$path.html").let { if (it.exists()) it else null }
+                ?: return null)
+        else
+            ProdRythmTemple(
+                engine,
+                Thread.currentThread().contextClassLoader.getResource("rythm/$path.html")?.readText() ?: return null
+            )
     }
 
 }
@@ -47,5 +45,16 @@ class RythmTemple(private val engine: RythmEngine, private val file: File) : Tem
             saves["context"] = context
         }
         return engine.render(file, context.saves)
+    }
+}
+
+class ProdRythmTemple(private val engine: RythmEngine, private val temple: String) : Temple {
+    override fun invoke(context: WebActionContext): String {
+        context.run {
+            saves["req"] = request
+            saves["resp"] = response
+            saves["context"] = context
+        }
+        return engine.render(temple, context.saves)
     }
 }

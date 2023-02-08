@@ -13,6 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
 import java.io.*
 import java.lang.Exception
+import java.net.URL
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -144,7 +145,7 @@ abstract class InternalWebServer : WebServer {
                         File("src/main/resources$path").let { if (it.exists()) it else null }
                     else
                         this::class.java.classLoader
-                            .getResource(path.substring(1))?.let { File(it.file) }
+                            .getResource(path.substring(1))
                 }?.let { result = it }
             if (result == null) {
                 resp.status = 404
@@ -244,6 +245,14 @@ abstract class InternalWebServer : WebServer {
                     "application/octet-stream"
                 }
                 resultByInputStream(FileInputStream(obj), contentType, obj.length())
+            }
+            is URL -> {
+                val suffix = obj.file.let { it.substring(it.lastIndexOf(".") + 1) }
+                val contentType = defaultFileContentType[suffix] ?: run {
+                    response.addHeader("Content-Disposition", "filename=\"${obj.file}\"")
+                    "application/octet-stream"
+                }
+                resultByInputStream(obj.openStream(), contentType)
             }
 
             else -> resultByString(jsonEncoder(request, response, JSON.toJSONString(obj)), "application/json")
