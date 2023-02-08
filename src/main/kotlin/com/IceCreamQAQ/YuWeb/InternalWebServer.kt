@@ -139,7 +139,7 @@ abstract class InternalWebServer : WebServer {
         var result = context.result
 
         if (!context.success) {
-            if (path.startsWith("/asset/"))
+            if (path.startsWith("/asset/") || path.startsWith("/assets/"))
                 let {
                     if (isDev)
                         File("src/main/resources$path").let { if (it.exists()) it else null }
