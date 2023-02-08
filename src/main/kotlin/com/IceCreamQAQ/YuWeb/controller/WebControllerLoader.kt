@@ -42,7 +42,7 @@ class WebControllerLoader : DefaultControllerLoaderImpl() {
     override fun load(items: Collection<LoadItem>) {
         impl?.let {
             context.getBean(TempleEngine::class.java, it)?.let {engine ->
-                engine.start("dev")
+                engine.start(file("pom.xml", "build.gradle", "build.gradle.kts")?.let { "dev" } ?: "prod")
                 templeEngine = engine
             }
         }
