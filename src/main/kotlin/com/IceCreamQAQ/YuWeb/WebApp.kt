@@ -8,6 +8,7 @@ import com.IceCreamQAQ.Yu.cache.EhcacheHelp
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.di.config.ConfigManager
 import com.IceCreamQAQ.Yu.event.EventBus
+import com.IceCreamQAQ.YuWeb.controller.WebControllerLoader
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
