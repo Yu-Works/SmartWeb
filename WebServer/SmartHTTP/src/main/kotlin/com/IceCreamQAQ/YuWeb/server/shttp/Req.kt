@@ -10,7 +10,7 @@ class Req(private val request: HttpRequest) : H.Request {
     override val scheme: String
         get() = request.scheme
     override val host: String
-        get() = request.remoteHost
+        get() = request.getHeader("Host")!!
     override val url: String
         get() = request.requestURL
     override val path: String
