@@ -1,6 +1,20 @@
-package com.IceCreamQAQ.YuWeb
+package com.IceCreamQAQ.SmartWeb
 
 import java.io.File
+
+class LazyObject<T : Any> {
+    lateinit var value: T
+}
+
+inline fun <T, R> Iterable<T>.forEachFirst(predicate: (T) -> R?): R {
+    for (element in this) predicate(element)?.let { return it }
+    throw NoSuchElementException("Collection contains no element matching the predicate.")
+}
+
+inline fun <T, R> Iterable<T>.forEachFirstOrNull(predicate: (T) -> R?): R? {
+    for (element in this) predicate(element)?.let { return it }
+    return null
+}
 
 fun String.toParaName() = this.toLowerCase().replace("_", "").replace("-", "")
 

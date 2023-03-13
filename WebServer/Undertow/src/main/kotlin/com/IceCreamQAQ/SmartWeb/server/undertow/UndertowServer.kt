@@ -2,8 +2,10 @@ package com.IceCreamQAQ.SmartWeb.server.undertow
 
 import com.IceCreamQAQ.SmartWeb.server.undertow.http.Req
 import com.IceCreamQAQ.SmartWeb.server.undertow.http.Resp
-import com.IceCreamQAQ.SmartWeb.websocket.WsAction
-import com.IceCreamQAQ.YuWeb.InternalWebServer
+import com.IceCreamQAQ.SmartWeb.http.websocket.WsAction
+import com.IceCreamQAQ.SmartWeb.server.InternalWebServer
+import com.IceCreamQAQ.SmartWeb.server.WebServerConfig
+import com.alibaba.fastjson2.JSON
 import io.undertow.Undertow
 import io.undertow.util.URLUtils
 import kotlinx.coroutines.*
@@ -14,7 +16,7 @@ import java.nio.ByteBuffer
 import java.nio.charset.Charset
 import kotlin.coroutines.CoroutineContext
 
-class UndertowServer : InternalWebServer() {
+class UndertowServer(config: WebServerConfig) : InternalWebServer(config) {
     lateinit var undertow: Undertow
 
     override val pool: CoroutineScope = object : CoroutineScope {
@@ -24,7 +26,7 @@ class UndertowServer : InternalWebServer() {
 
     override fun start() {
         undertow = Undertow.builder()
-            .addHttpListener(8080, "0.0.0.0")
+            .addHttpListener(port, "0.0.0.0")
             .setHandler {
 
                 val parameters = HashMap<String, MutableList<String>>()
@@ -73,18 +75,8 @@ class UndertowServer : InternalWebServer() {
 
 
                     req.body = when (req.contentType) {
-                        "application/json" -> InternalWebServer.jsonDecoder(
-                            req,
-                            resp,
-                            req.readBody()
-                        )
-
-                        "application/xml" -> InternalWebServer.xmlDecoder(
-                            req,
-                            resp,
-                            req.readBody()
-                        )
-
+                        "application/json" -> JSON.parseObject(req.readBody())
+                        "application/xml" -> TODO()
                         else -> null
                     }
 

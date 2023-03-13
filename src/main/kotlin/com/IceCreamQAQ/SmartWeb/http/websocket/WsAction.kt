@@ -1,4 +1,4 @@
-package com.IceCreamQAQ.SmartWeb.websocket
+package com.IceCreamQAQ.SmartWeb.http.websocket
 
 interface WsAction {
 

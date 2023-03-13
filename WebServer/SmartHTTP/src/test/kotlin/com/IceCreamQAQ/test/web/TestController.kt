@@ -1,18 +1,18 @@
 package com.IceCreamQAQ.test.web
 
 import com.IceCreamQAQ.SmartWeb.annotation.NewWs
+import com.IceCreamQAQ.SmartWeb.annotation.WebAction
+import com.IceCreamQAQ.SmartWeb.annotation.WebController
 import com.IceCreamQAQ.SmartWeb.event.WebServerStatusChangedEvent
-import com.IceCreamQAQ.SmartWeb.websocket.WsAction
-import com.IceCreamQAQ.SmartWeb.websocket.kotlin.KWsActionCreator
-import com.IceCreamQAQ.SmartWeb.websocket.kotlin.KWsActionCreator.Companion.newWs
-import com.IceCreamQAQ.SmartWeb.websocket.kotlin.newWs
+import com.IceCreamQAQ.SmartWeb.http.websocket.WsAction
+import com.IceCreamQAQ.SmartWeb.http.websocket.kotlin.KWsActionCreator
+import com.IceCreamQAQ.SmartWeb.http.websocket.kotlin.KWsActionCreator.Companion.newWs
+import com.IceCreamQAQ.SmartWeb.http.websocket.kotlin.newWs
 import com.IceCreamQAQ.Yu.annotation.Action
 import com.IceCreamQAQ.Yu.annotation.Catch
 import com.IceCreamQAQ.Yu.annotation.Event
 import com.IceCreamQAQ.Yu.annotation.EventListener
 import com.IceCreamQAQ.Yu.toJSONString
-import com.IceCreamQAQ.YuWeb.H
-import com.IceCreamQAQ.YuWeb.annotation.WebController
 import com.IceCreamQAQ.YuWeb.server.shttp.websocket.WsHandler
 import com.IceCreamQAQ.Yu.validation.Max
 import com.IceCreamQAQ.Yu.validation.Min
@@ -44,30 +44,30 @@ annotation class Permission(val value: String)
 @WebController
 class TestController {
 
-    @NewWs("/hello")
-    fun onWebServerStart() = newWs {
-        handleText {
-            println(it)
-            send("你发送的是: $it。")
+//    @NewWs("/hello")
+//    fun onWebServerStart() = newWs {
+//        handleText {
+//            println(it)
+//            send("你发送的是: $it。")
+//
+//            attachment?.let { send("您上次发送的是: ${attachment}。") }
+//
+//            attachment = it
+//            if (it == "999") sendToAll("转发到全部人: 999！")
+//        }
+//        handShake {
+//            send("欢迎链接。")
+//        }
+//    }
 
-            attachment?.let { send("您上次发送的是: ${attachment}。") }
+    @WebAction("tpv/{pv}")
+    fun testPathVar(pv: Int?) = pv ?: -1
 
-            attachment = it
-            if (it == "999") sendToAll("转发到全部人: 999！")
-        }
-        handShake {
-            send("欢迎链接。")
-        }
-    }
-
-    @Action("tpv/{pv}")
-    fun testPathVar(pv: Int?) = pv
-
-    @Action("2entity")
+    @WebAction("2entity")
     @Permission("user.test")
     fun entityTest(entity1: Entity1, entity2: Entity2) = arrayListOf(entity1, entity2)
 
-    @Action("testDownload")
+    @WebAction("testDownload")
     fun testDownload() = File("pom.xml")
 
     //    @Action("testStudent")
@@ -76,12 +76,12 @@ class TestController {
 //    @Action("ta")
 //    fun tcp(testName: String) = "你好 $testName。"
 //
-    @Action("tvn")
+    @WebAction("tvn")
     fun tvn(@Min(50) @Max(100) tn: Long) = "测试数值：$tn。"
 
     data class User(val name: String, val sex: Boolean?)
 
-    @Action("update/{id}")
+    @WebAction("update/{id}")
     fun update(user: User, id: Int) {
 
     }

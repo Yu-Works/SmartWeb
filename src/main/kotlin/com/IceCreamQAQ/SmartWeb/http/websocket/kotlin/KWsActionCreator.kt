@@ -1,10 +1,10 @@
-package com.IceCreamQAQ.SmartWeb.websocket.kotlin
+package com.IceCreamQAQ.SmartWeb.http.websocket.kotlin
 
-import com.IceCreamQAQ.SmartWeb.WebServer
-import com.IceCreamQAQ.SmartWeb.websocket.WsSession
-import com.IceCreamQAQ.YuWeb.InternalWebServer
+import com.IceCreamQAQ.SmartWeb.server.WebServer
+import com.IceCreamQAQ.SmartWeb.http.websocket.WsSession
+import com.IceCreamQAQ.SmartWeb.server.InternalWebServer
 
-fun newWs(create: KWsActionCreator.() -> Unit):KWsActionCreator = KWsActionCreator().apply(create)
+fun newWs(create: KWsActionCreator.() -> Unit): KWsActionCreator = KWsActionCreator().apply(create)
 
 class KWsActionCreator {
 

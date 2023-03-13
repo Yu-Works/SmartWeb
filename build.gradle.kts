@@ -2,12 +2,12 @@ plugins {
     java
     kotlin("jvm") version "1.8.0"
 }
-val coreVersion = "Yu-Core:0.3.0.DEV.2"
+val coreVersion = "Yu-Core:0.3.0"
 
 
 
 allprojects {
-    version = "0.0.2.0-DEV29"
+    version = "0.1.0"
     val dir = projectDir.absolutePath.split(File.separator)
     val l2 = dir[dir.size - 2]
     group = if (name == "SmartWeb") "com.IceCreamQAQ"

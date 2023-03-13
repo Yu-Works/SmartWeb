@@ -1,9 +1,10 @@
 package com.IceCreamQAQ.YuWeb.server.shttp
 
-import com.IceCreamQAQ.SmartWeb.websocket.WsAction
-import com.IceCreamQAQ.SmartWeb.websocket.WsContext
-import com.IceCreamQAQ.YuWeb.InternalWebServer
+import com.IceCreamQAQ.SmartWeb.http.websocket.WsAction
+import com.IceCreamQAQ.SmartWeb.server.InternalWebServer
+import com.IceCreamQAQ.SmartWeb.server.WebServerConfig
 import com.IceCreamQAQ.YuWeb.server.shttp.websocket.WsHandler
+import com.alibaba.fastjson2.JSON
 import kotlinx.coroutines.*
 import org.smartboot.http.server.HttpBootstrap
 import org.smartboot.http.server.HttpRequest
@@ -17,7 +18,7 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 
-class SmartHTTPServer : InternalWebServer() {
+class SmartHTTPServer(config: WebServerConfig) : InternalWebServer(config) {
 
     class SmartHttpScope(pool: CoroutineDispatcher) : CoroutineScope {
 
@@ -59,23 +60,13 @@ class SmartHTTPServer : InternalWebServer() {
                     }
 
                     req.body = when (req.contentType) {
-                        "application/json" -> jsonDecoder(
-                            req,
-                            resp,
-                            request.readBody(request.characterEncoding)
-                        )
-
-                        "application/xml" -> xmlDecoder(
-                            req,
-                            resp,
-                            request.readBody(request.characterEncoding)
-                        )
-
+                        "application/json" -> JSON.parseObject(request.readBody(request.characterEncoding))
+                        "application/xml" -> TODO()
                         else -> null
                     }
                 }
 
-                req.session = findSession(req.cookie("YuSid")?.value, resp)
+                req.session = findSession(req.cookie(sessionCookieName)?.value, resp)
 
                 pool.launch {
                     onRequest(req, resp)

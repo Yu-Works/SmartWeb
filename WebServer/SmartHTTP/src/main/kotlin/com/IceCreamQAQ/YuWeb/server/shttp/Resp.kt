@@ -1,30 +1,34 @@
 package com.IceCreamQAQ.YuWeb.server.shttp
 
-import com.IceCreamQAQ.YuWeb.H
+import com.IceCreamQAQ.SmartWeb.http.*
 import org.smartboot.http.common.enums.HttpStatus
 import org.smartboot.http.server.HttpResponse
 import java.io.InputStream
 import java.io.OutputStream
 
-class Resp(val response: HttpResponse) : H.Response {
+class Resp(val response: HttpResponse) : Response {
 
     override var status: Int = 200
-    override val cookies = ArrayList<H.Cookie>()
-    override val headers = ArrayList<H.Header>()
+    override val cookies = ArrayList<Cookie>()
+    override val headers = ArrayList<Header>()
     override var contentType: String? = null
     override var charset: String? = null
     override var contentLength: Long = -1
 
-    override fun addCookie(cookie: H.Cookie) {
+    override fun addCookie(cookie: Cookie) {
         cookies.add(cookie)
     }
 
-    override fun addHeader(header: H.Header) {
+    override fun addCookie(key: String, value: String) {
+        cookies.add(Cookie(key, value))
+    }
+
+    override fun addHeader(header: Header) {
         headers.add(header)
     }
 
     override fun addHeader(key: String, value: String) {
-        headers.add(H.Header(key, value))
+        headers.add(Header(key, value))
     }
 
     override val output: OutputStream
@@ -41,7 +45,7 @@ class Resp(val response: HttpResponse) : H.Response {
         cookies.forEach { response.addHeader("Set-Cookie", it.toCookieString()) }
 
         response.setHttpStatus(HttpStatus.valueOf(this.status))
-        if (this.contentLength > 0) response.setContentLength(this.contentLength.toInt())
+        if (this.contentLength > 0) response.contentLength = this.contentLength.toInt()
     }
 
     override fun write(result: ByteArray) {

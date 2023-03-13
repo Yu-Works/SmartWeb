@@ -1,7 +1,7 @@
-package com.IceCreamQAQ.SmartWeb.websocket.kotlin
+package com.IceCreamQAQ.SmartWeb.http.websocket.kotlin
 
-import com.IceCreamQAQ.SmartWeb.websocket.WsAction
-import com.IceCreamQAQ.SmartWeb.websocket.WsSession
+import com.IceCreamQAQ.SmartWeb.http.websocket.WsAction
+import com.IceCreamQAQ.SmartWeb.http.websocket.WsSession
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

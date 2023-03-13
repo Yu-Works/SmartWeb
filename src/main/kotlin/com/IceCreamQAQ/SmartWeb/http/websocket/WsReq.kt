@@ -1,4 +1,4 @@
-package com.IceCreamQAQ.SmartWeb.websocket
+package com.IceCreamQAQ.SmartWeb.http.websocket
 
 import java.net.InetAddress
 import java.net.InetSocketAddress

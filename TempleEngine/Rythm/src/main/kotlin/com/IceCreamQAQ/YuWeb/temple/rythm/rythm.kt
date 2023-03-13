@@ -1,8 +1,8 @@
 package com.IceCreamQAQ.YuWeb.temple.rythm
 
-import com.IceCreamQAQ.YuWeb.WebActionContext
-import com.IceCreamQAQ.YuWeb.temple.Temple
-import com.IceCreamQAQ.YuWeb.temple.TempleEngine
+import com.IceCreamQAQ.SmartWeb.controller.WebActionContext
+import com.IceCreamQAQ.SmartWeb.temple.Temple
+import com.IceCreamQAQ.SmartWeb.temple.TempleEngine
 import org.rythmengine.Rythm
 import org.rythmengine.RythmEngine
 import java.io.File
@@ -15,9 +15,9 @@ class RythmTempleEngine : TempleEngine {
 
     private var isDev = false
 
-    override fun start(mode: String) {
-        engine = RythmEngine(mapOf("engine.mode" to if (mode == "dev") Rythm.Mode.dev else Rythm.Mode.prod))
-        if (mode == "dev") isDev = true
+    override fun start(isDevMode: Boolean) {
+        engine = RythmEngine(mapOf("engine.mode" to if (isDevMode) Rythm.Mode.dev else Rythm.Mode.prod))
+        if (isDevMode) isDev = true
     }
 
     override fun close() {
@@ -40,8 +40,8 @@ class RythmTempleEngine : TempleEngine {
 class RythmTemple(private val engine: RythmEngine, private val file: File) : Temple {
     override fun invoke(context: WebActionContext): String {
         context.run {
-            saves["req"] = request
-            saves["resp"] = response
+            saves["req"] = req
+            saves["resp"] = resp
             saves["context"] = context
         }
         return engine.render(file, context.saves)
@@ -51,8 +51,8 @@ class RythmTemple(private val engine: RythmEngine, private val file: File) : Tem
 class ProdRythmTemple(private val engine: RythmEngine, private val temple: String) : Temple {
     override fun invoke(context: WebActionContext): String {
         context.run {
-            saves["req"] = request
-            saves["resp"] = response
+            saves["req"] = req
+            saves["resp"] = resp
             saves["context"] = context
         }
         return engine.render(temple, context.saves)
