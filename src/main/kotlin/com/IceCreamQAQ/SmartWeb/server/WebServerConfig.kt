@@ -11,6 +11,7 @@ data class WebServerConfig(
     val name: String,
     val port: Int,
     val cors: String?,
+    val upload: WebServerUploadConfig,
     val rootRouter: WebRootRouter,
     val sessionCache: EhcacheHelp<Session>
 )

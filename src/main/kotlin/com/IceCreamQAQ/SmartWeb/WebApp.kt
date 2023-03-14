@@ -4,6 +4,7 @@ import com.IceCreamQAQ.SmartWeb.controller.WebControllerLoader
 import com.IceCreamQAQ.SmartWeb.event.WebServerStatusChangedEvent
 import com.IceCreamQAQ.SmartWeb.server.InternalWebServer
 import com.IceCreamQAQ.SmartWeb.server.WebServerConfig
+import com.IceCreamQAQ.SmartWeb.server.WebServerUploadConfig
 import com.IceCreamQAQ.Yu.annotation.Config
 import com.IceCreamQAQ.Yu.`as`.ApplicationService
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
@@ -81,6 +82,7 @@ class WebApp(
                         configManager.getConfig("$configName.port")
                             ?: error("在试图构建 WebServer: $serverName 时，缺少必要的端口配置，请检查配置项: $configName.port。"),
                         configManager.getConfig("$configName.cors"),
+                        configManager.getConfig<WebServerUploadConfig>("$configName.upload") ?: WebServerUploadConfig(),
                         rootRouter,
                         EhcacheHelp(cm!!.getCache(serverName, String::class.java, Any::class.java))
                     )

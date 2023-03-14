@@ -79,6 +79,7 @@ allprojects {
 
     dependencies {
         implementation("com.IceCreamQAQ:$coreVersion")
+        implementation("commons-fileupload:commons-fileupload:1.5")
     }
 
 }

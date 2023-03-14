@@ -1,10 +1,7 @@
 package com.IceCreamQAQ.SmartWeb.controller
 
 import com.IceCreamQAQ.SmartWeb.annotation.*
-import com.IceCreamQAQ.SmartWeb.http.Cookie
-import com.IceCreamQAQ.SmartWeb.http.Request
-import com.IceCreamQAQ.SmartWeb.http.Response
-import com.IceCreamQAQ.SmartWeb.http.Session
+import com.IceCreamQAQ.SmartWeb.http.*
 import com.IceCreamQAQ.Yu.controller.ActionContext
 import com.IceCreamQAQ.Yu.controller.ControllerInstanceGetter
 import com.IceCreamQAQ.Yu.controller.simple.SimpleKJReflectMethodInvoker
@@ -46,6 +43,10 @@ open class WebMethodInvoker(
                 throw RuntimeException()
             }
 
+            if (it.relType.realClass == List::class.java && it.relType.generics!![0].realClass == UploadFile::class.java) {
+                valueGetter { req.uploadFiles?.get(it.name) }
+            }
+
             kotlin.runCatching {
                 when (it.type) {
                     ActionContext::class.java, WebActionContext::class.java -> valueGetter { this }
@@ -53,6 +54,13 @@ open class WebMethodInvoker(
                     Response::class.java -> valueGetter { resp }
                     Session::class.java -> valueGetter { this.req.session }
                     Cookie::class.java -> valueGetter { this.req.cookie(it.name) }
+                    UploadFile::class.java -> valueGetter {
+                        req.uploadFiles?.get(it.name)?.let { files ->
+                            if (files.size > 1)
+                                error("遇到多个文件上传参数 ${it.name}，但参数只接受单个上传文件！")
+                            else files[0]
+                        }
+                    }
                     else -> {
                         it.annotation<SessionValue> {
                             if (it.type == ReferenceValue::class.java)
@@ -96,7 +104,7 @@ open class WebMethodInvoker(
                         }
 
 
-                        val isSimple = it.type.isSimpleClass()
+                        val isSimple = it.relType.realClass.isSimpleClass()
 
                         val isBody =
                             !isSimple && !it.hasAnnotation<RequestParam>() && (it.hasAnnotation<RequestBody>() || it.name in requestBodyParamName || it.name == it.type.name.toLowerCaseFirstOne())

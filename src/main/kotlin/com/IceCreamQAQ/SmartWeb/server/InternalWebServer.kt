@@ -6,6 +6,7 @@ import com.IceCreamQAQ.SmartWeb.controller.render.Render
 import com.IceCreamQAQ.SmartWeb.defaultFileContentType
 import com.IceCreamQAQ.SmartWeb.http.*
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
+import com.IceCreamQAQ.Yu.util.subStringByLast
 import com.alibaba.fastjson2.JSON
 import com.alibaba.fastjson2.JSONArray
 import kotlinx.coroutines.CoroutineScope
@@ -31,6 +32,24 @@ abstract class InternalWebServer(
     val sessionCache: EhcacheHelp<Session> = config.sessionCache
     val cors: Boolean
     val corsDomain: Array<String>
+
+    val tmpLocation = File(config.upload.tempDir + "/SmartWeb/${UUID.randomUUID()}")
+        .apply { if (!exists()) mkdirs() }
+
+    fun String.makeSize(): Int {
+        return when (this.last()) {
+            'g' -> this.subStringByLast(1).toInt() * 1024 * 1024 * 1024
+            'm' -> this.subStringByLast(1).toInt() * 1024 * 1024
+            'k' -> this.subStringByLast(1).toInt() * 1024
+            else -> this.toInt()
+        }
+    }
+
+    val maxUploadSize = config.upload.maxSize.makeSize()
+    val maxSingleFileSize = config.upload.maxSize.makeSize()
+    val writeTmpFileSize = config.upload.writeTmpFileSize.makeSize()
+    val maxUploadFileSize = config.upload.maxFile
+
 
     abstract val pool: CoroutineScope
 
@@ -149,6 +168,14 @@ abstract class InternalWebServer(
             is Byte -> resultByByteArray(byteArrayOf(obj))
             is ByteArray -> resultByByteArray(obj)
             is InputStream -> resultByInputStream(obj)
+            is UploadFile -> {
+                val suffix = obj.name.let { it.substring(it.lastIndexOf(".") + 1) }
+                val contentType = defaultFileContentType[suffix] ?: run {
+                    resp.addHeader("Content-Disposition", "filename=\"${obj.name}\"")
+                    "application/octet-stream"
+                }
+                resultByInputStream(obj.inputStream, contentType, obj.size)
+            }
             is File -> {
                 val suffix = obj.name.let { it.substring(it.lastIndexOf(".") + 1) }
                 val contentType = defaultFileContentType[suffix] ?: run {

@@ -2,6 +2,8 @@ package com.IceCreamQAQ.SmartWeb.http
 
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
+import org.apache.commons.fileupload.FileItem
+import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 import java.lang.StringBuilder
@@ -37,6 +39,7 @@ interface Request {
     val parameters: Map<String, Array<String>>
     val body: JSONObject?
     val bodyArray: JSONArray?
+    val uploadFiles: Map<String, ArrayList<UploadFile>>?
     val inputStream: InputStream?
 
     val userAgent: String
@@ -162,3 +165,32 @@ class Accept(
 }
 
 class CORS
+
+interface UploadFile {
+    val name: String
+    val size: Long
+    val fieldName: String
+    val inputStream: InputStream
+    val contentType: String
+
+    fun transferTo(file: File)
+}
+
+class CommonsFileUploadFile(
+    val fileItem: FileItem
+):UploadFile{
+    override val name: String
+        get() = fileItem.name
+    override val size: Long
+        get() = fileItem.size
+    override val fieldName: String
+        get() = fileItem.fieldName
+    override val inputStream: InputStream
+        get() = fileItem.inputStream
+    override val contentType: String
+        get() = fileItem.contentType
+
+    override fun transferTo(file: File) {
+        fileItem.write(file)
+    }
+}
