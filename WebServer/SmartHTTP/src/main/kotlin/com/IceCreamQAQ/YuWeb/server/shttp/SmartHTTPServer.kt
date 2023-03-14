@@ -50,6 +50,7 @@ class SmartHTTPServer(config: WebServerConfig) : InternalWebServer(config) {
     override fun start() {
         bootstrap = HttpBootstrap()
         bootstrap.configuration().bannerEnabled(false)
+        bootstrap.configuration().serverName("SmartWeb")
         bootstrap.configuration().threadNum(Runtime.getRuntime().availableProcessors() * 2)
         bootstrap.httpHandler(object : HttpServerHandler() {
             override fun handle(request: HttpRequest, response: HttpResponse, future: CompletableFuture<Any>) {
