@@ -35,6 +35,7 @@ class Req(private val request: HttpRequest) : Request {
 
     override var body: JSONObject? = null
     override val bodyArray: JSONArray? = null
+    override var uploadFiles: Map<String, ArrayList<UploadFile>>? = null
 
     override val inputStream: InputStream? = null
 

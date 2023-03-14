@@ -1,16 +1,23 @@
 package com.IceCreamQAQ.YuWeb.server.shttp
 
+import com.IceCreamQAQ.SmartWeb.http.CommonsFileUploadFile
+import com.IceCreamQAQ.SmartWeb.http.UploadFile
 import com.IceCreamQAQ.SmartWeb.http.websocket.WsAction
 import com.IceCreamQAQ.SmartWeb.server.InternalWebServer
 import com.IceCreamQAQ.SmartWeb.server.WebServerConfig
 import com.IceCreamQAQ.YuWeb.server.shttp.websocket.WsHandler
 import com.alibaba.fastjson2.JSON
+import com.alibaba.fastjson2.JSONObject
 import kotlinx.coroutines.*
+import org.apache.commons.fileupload.FileUpload
+import org.apache.commons.fileupload.RequestContext
+import org.apache.commons.fileupload.disk.DiskFileItemFactory
 import org.smartboot.http.server.HttpBootstrap
 import org.smartboot.http.server.HttpRequest
 import org.smartboot.http.server.HttpResponse
 import org.smartboot.http.server.HttpServerHandler
 import org.smartboot.http.server.handler.WebSocketRouteHandler
+import java.io.InputStream
 import java.io.InputStreamReader
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.LinkedBlockingQueue
@@ -51,12 +58,43 @@ class SmartHTTPServer(config: WebServerConfig) : InternalWebServer(config) {
                 if (req.method != "get" && req.method != "head") {
 
                     if (req.contentType.contains("multipart/form-data")) {
-                        val bound = request.contentType.split("boundary=")[1].trim()
 
-                        val input = request.inputStream!!
-//                        input.buffered().re
-                        println(bound)
-                        println(request.readBody())
+                        val factory = DiskFileItemFactory()
+                        factory.repository = tmpLocation
+                        factory.sizeThreshold = writeTmpFileSize
+//                        factory
+
+                        val uploadMap = HashMap<String, ArrayList<UploadFile>>()
+                        val paramMap = HashMap<String, ArrayList<String>>()
+
+                        val uploads = FileUpload(factory).parseRequest(object : RequestContext {
+                            override fun getCharacterEncoding(): String = req.charset
+                            override fun getContentType(): String = request.contentType
+                            override fun getContentLength(): Int = request.contentLength
+                            override fun getInputStream(): InputStream = request.inputStream
+                        }).forEach {
+                            if (it.isFormField) {
+                                val list = paramMap.getOrPut(it.fieldName) { ArrayList() }
+                                list.add(it.string)
+                            } else {
+                                val uploadFile = CommonsFileUploadFile(it)
+                                val list = uploadMap.getOrPut(it.fieldName) { ArrayList() }
+                                list.add(uploadFile)
+                            }
+                        }
+
+                        if (paramMap.isNotEmpty()) {
+                            req.body = JSONObject()
+                            paramMap.forEach { (key, v) ->
+                                if (v.size == 1) (req.body as JSONObject)[key] = v[0]
+                                else (req.body as JSONObject)[key] = v
+                            }
+                        }
+
+                        if (uploadMap.isNotEmpty()){
+                            req.uploadFiles = uploadMap
+                        }
+
                     }
 
                     req.body = when (req.contentType) {

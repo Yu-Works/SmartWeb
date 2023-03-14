@@ -1,6 +1,6 @@
 package com.IceCreamQAQ.SmartWeb.controller
 
-import com.IceCreamQAQ.SmartWeb.annotation.WebAction
+import com.IceCreamQAQ.SmartWeb.annotation.*
 import com.IceCreamQAQ.SmartWeb.forEachFirst
 import com.IceCreamQAQ.SmartWeb.forEachFirstOrNull
 import com.IceCreamQAQ.SmartWeb.http.HttpMethod
@@ -51,10 +51,10 @@ class WebControllerLoader(
 
     override fun actionInfo(controllerChannel: List<String>, actionMethod: Method): Pair<String, List<String>>? {
         actionMethod.annotation<WebAction> { return value to methods.map { it.method } }
-        actionMethod.annotation<WebAction> { return value to listOf("test1") }
-        actionMethod.annotation<WebAction> { return value to listOf("test2") }
-        actionMethod.annotation<WebAction> { return value to listOf("test3") }
-        actionMethod.annotation<WebAction> { return value to listOf("test4") }
+        actionMethod.annotation<GetAction> { return value to listOf("GET") }
+        actionMethod.annotation<PostAction> { return value to listOf("POST") }
+        actionMethod.annotation<PutAction> { return value to listOf("PUT") }
+        actionMethod.annotation<DeleteAction> { return value to listOf("DELETE") }
         return null
     }
 

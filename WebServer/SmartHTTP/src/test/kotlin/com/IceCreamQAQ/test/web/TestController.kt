@@ -1,9 +1,11 @@
 package com.IceCreamQAQ.test.web
 
 import com.IceCreamQAQ.SmartWeb.annotation.NewWs
+import com.IceCreamQAQ.SmartWeb.annotation.PostAction
 import com.IceCreamQAQ.SmartWeb.annotation.WebAction
 import com.IceCreamQAQ.SmartWeb.annotation.WebController
 import com.IceCreamQAQ.SmartWeb.event.WebServerStatusChangedEvent
+import com.IceCreamQAQ.SmartWeb.http.UploadFile
 import com.IceCreamQAQ.SmartWeb.http.websocket.WsAction
 import com.IceCreamQAQ.SmartWeb.http.websocket.kotlin.KWsActionCreator
 import com.IceCreamQAQ.SmartWeb.http.websocket.kotlin.KWsActionCreator.Companion.newWs
@@ -85,6 +87,9 @@ class TestController {
     fun update(user: User, id: Int) {
 
     }
+
+    @PostAction("testUpload")
+    fun testUpload(file: UploadFile) = file
 //
 ////    @Action("tcv")
 ////    fun tcv(tcv: Test) = tcv
