@@ -41,6 +41,7 @@ class Req(internal val exc: HttpServerExchange) : Request {
 
     override var body: JSONObject? = null
     override val bodyArray: JSONArray? = null
+    override val uploadFiles: Map<String, java.util.ArrayList<UploadFile>>? = null
 
     override val inputStream: InputStream? = null
 
