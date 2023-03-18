@@ -16,7 +16,8 @@ enum class HttpMethod(val method: String) {
     PUT("PUT"),
     DELETE("DELETE"),
     OPTIONS("OPTIONS"),
-    HEAD("HEAD")
+    HEAD("HEAD"),
+    WebSocket("WebSocket")
 }
 
 interface Request {

@@ -1,14 +1,18 @@
 package com.IceCreamQAQ.SmartWeb
 
+import com.IceCreamQAQ.SmartWeb.annotation.NewWs
 import com.IceCreamQAQ.SmartWeb.controller.WebControllerLoader
 import com.IceCreamQAQ.SmartWeb.event.WebServerStatusChangedEvent
+import com.IceCreamQAQ.SmartWeb.http.websocket.WsAction
 import com.IceCreamQAQ.SmartWeb.server.InternalWebServer
 import com.IceCreamQAQ.SmartWeb.server.WebServerConfig
 import com.IceCreamQAQ.SmartWeb.server.WebServerUploadConfig
+import com.IceCreamQAQ.Yu.annotation
 import com.IceCreamQAQ.Yu.annotation.Config
 import com.IceCreamQAQ.Yu.`as`.ApplicationService
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
 import com.IceCreamQAQ.Yu.di.YuContext
+import com.IceCreamQAQ.Yu.di.YuContext.Companion.get
 import com.IceCreamQAQ.Yu.di.config.ConfigManager
 import com.IceCreamQAQ.Yu.di.config.ConfigManager.Companion.getConfig
 import com.IceCreamQAQ.Yu.event.EventBus
@@ -90,6 +94,18 @@ class WebApp(
 
                     val serverImpl = Class.forName(impl).getConstructor(WebServerConfig::class.java)
                         .newInstance(config) as InternalWebServer
+
+                    rootRouter.actions
+                        .forEach {
+                            it.actionMethod.annotation<NewWs> {
+                                serverImpl.createWsAction(
+                                    value,
+                                    it.actionMethod.run {
+                                        invoke(context[declaringClass])
+                                    } as WsAction
+                                )
+                            }
+                        }
 
                     put(serverName, serverImpl)
 

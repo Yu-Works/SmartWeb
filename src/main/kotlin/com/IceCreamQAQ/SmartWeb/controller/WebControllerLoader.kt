@@ -55,6 +55,7 @@ class WebControllerLoader(
         actionMethod.annotation<PostAction> { return value to listOf("POST") }
         actionMethod.annotation<PutAction> { return value to listOf("PUT") }
         actionMethod.annotation<DeleteAction> { return value to listOf("DELETE") }
+        actionMethod.annotation<NewWs> { return value to  listOf("WebSocket") }
         return null
     }
 
