@@ -4,6 +4,7 @@ import com.IceCreamQAQ.SmartWeb.annotation.NewWs
 import com.IceCreamQAQ.SmartWeb.controller.WebControllerLoader
 import com.IceCreamQAQ.SmartWeb.event.WebServerStatusChangedEvent
 import com.IceCreamQAQ.SmartWeb.http.websocket.WsAction
+import com.IceCreamQAQ.SmartWeb.http.websocket.kotlin.KWsActionCreator
 import com.IceCreamQAQ.SmartWeb.server.InternalWebServer
 import com.IceCreamQAQ.SmartWeb.server.WebServerConfig
 import com.IceCreamQAQ.SmartWeb.server.WebServerUploadConfig
@@ -102,7 +103,9 @@ class WebApp(
                                     value,
                                     it.actionMethod.run {
                                         invoke(context[declaringClass])
-                                    } as WsAction
+                                    }.let {r->
+                                        if (r is KWsActionCreator) r.build(serverImpl) else r as WsAction
+                                    }
                                 )
                             }
                         }

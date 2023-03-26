@@ -73,7 +73,7 @@ abstract class InternalWebServer(
 
         val origin = req.header("Origin")?.value
 
-        if (origin != null) {
+        if (origin != null && origin != "${req.scheme}://${req.host}") {
             if (!cors) return
             if (origin !in corsDomain) return
 

@@ -12,7 +12,7 @@ class Resp(val response: HttpResponse) : Response {
     override val cookies = ArrayList<Cookie>()
     override val headers = ArrayList<Header>()
     override var contentType: String? = null
-    override var charset: String? = null
+    override var charset: String? = "UTF-8"
     override var contentLength: Long = -1
 
     override fun addCookie(cookie: Cookie) {
