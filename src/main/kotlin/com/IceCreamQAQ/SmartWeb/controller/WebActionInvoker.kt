@@ -18,8 +18,9 @@ class WebActionInvoker(
 ) : DssActionInvoker<WebActionContext>(level, matchers, action, beforeProcesses, aftersProcesses, catchsProcesses) {
 
     override suspend fun invoke(context: WebActionContext): Boolean {
-        if (context.requestMethod !in allowMethods) return false
         return super.invoke(context)
     }
+
+    override suspend fun checkChannel(context: WebActionContext) = context.requestMethod in allowMethods
 
 }
