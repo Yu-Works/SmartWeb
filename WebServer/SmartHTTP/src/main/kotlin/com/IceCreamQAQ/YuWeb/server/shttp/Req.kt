@@ -9,7 +9,7 @@ import java.net.InetSocketAddress
 
 class Req(private val request: HttpRequest) : Request {
     override val scheme: String
-        get() = request.scheme
+        get() = header("X-Forwarded-Proto")?.value ?: request.scheme
     override val host: String
         get() = request.getHeader("Host")!!
     override val url: String
@@ -48,10 +48,10 @@ class Req(private val request: HttpRequest) : Request {
     override var cors: CORS? = null
 
     override val accept: Accept = Accept(
-        (request.getHeader("Accept") ?: "*/*").split(",").map { it.trim() }.toTypedArray(),
-        "",
-        "",
-        ""
+            (request.getHeader("Accept") ?: "*/*").split(",").map { it.trim() }.toTypedArray(),
+            "",
+            "",
+            ""
     )
     override lateinit var session: Session
 
