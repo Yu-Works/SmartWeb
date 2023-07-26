@@ -44,7 +44,7 @@ class Resp(val response: HttpResponse) : Response {
         headers.forEach { response.addHeader(it.name, it.value) }
         cookies.forEach { response.addHeader("Set-Cookie", it.toCookieString()) }
 
-        response.setHttpStatus(HttpStatus.valueOf(this.status))
+        response.setHttpStatus(this.status, "")
         if (this.contentLength > 0) response.contentLength = this.contentLength.toInt()
     }
 
