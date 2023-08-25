@@ -184,6 +184,10 @@ abstract class InternalWebServer(
                 }
                 resultByInputStream(FileInputStream(obj), contentType, obj.length())
             }
+            is DownloadFile ->{
+                resp.addHeader("Content-Disposition", "filename=\"${obj.name}\"")
+                resultByInputStream(obj.input, obj.contentType, obj.length)
+            }
 
             else -> resultByString(JSON.toJSONString(obj), "application/json")
         }

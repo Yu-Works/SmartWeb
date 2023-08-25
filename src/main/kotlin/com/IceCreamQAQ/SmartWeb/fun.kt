@@ -47,3 +47,8 @@ val defaultFileContentType = hashMapOf(
     "txt" to "text/plain"
 //    "" to "",
 )
+
+fun String.toFileContentType(): String {
+    val suffix = this.substring(this.lastIndexOf(".") + 1)
+    return defaultFileContentType[suffix] ?: "application/octet-stream"
+}

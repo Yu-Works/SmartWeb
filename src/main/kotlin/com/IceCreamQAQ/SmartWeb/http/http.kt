@@ -1,5 +1,6 @@
 package com.IceCreamQAQ.SmartWeb.http
 
+import com.IceCreamQAQ.SmartWeb.toFileContentType
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
 import org.apache.commons.fileupload.FileItem
@@ -179,7 +180,7 @@ interface UploadFile {
 
 class CommonsFileUploadFile(
     val fileItem: FileItem
-):UploadFile{
+) : UploadFile {
     override val name: String
         get() = fileItem.name
     override val size: Long
@@ -194,4 +195,15 @@ class CommonsFileUploadFile(
     override fun transferTo(file: File) {
         fileItem.write(file)
     }
+}
+
+class DownloadFile(
+    val name: String,
+    val contentType: String,
+    val input: InputStream,
+    val length: Long
+) {
+    constructor(file: File) : this(file.name, file.name.toFileContentType(), file.inputStream(), file.length())
+    constructor(file: File, contentType: String) : this(file.name, contentType, file.inputStream(), file.length())
+    constructor(name: String, file: File) : this(name, name.toFileContentType(), file.inputStream(), file.length())
 }

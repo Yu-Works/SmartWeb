@@ -98,10 +98,9 @@ class SmartHTTPServer(config: WebServerConfig) : InternalWebServer(config) {
 
                     }
 
-                    req.body = when (req.contentType) {
-                        "application/json" -> JSON.parseObject(request.readBody(request.characterEncoding))
+                    when (req.contentType) {
+                        "application/json" -> req.body = JSON.parseObject(request.readBody(request.characterEncoding))
                         "application/xml" -> TODO()
-                        else -> null
                     }
                 }
 
