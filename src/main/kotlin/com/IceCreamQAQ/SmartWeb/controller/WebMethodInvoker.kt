@@ -107,7 +107,7 @@ open class WebMethodInvoker(
                         val isSimple = it.relType.realClass.isSimpleClass()
 
                         val isBody =
-                            !isSimple && !it.hasAnnotation<RequestParam>() && (it.hasAnnotation<RequestBody>() || it.name in requestBodyParamName || it.name == it.type.name.toLowerCaseFirstOne())
+                            !isSimple && !it.hasAnnotation<RequestParam>() && (it.hasAnnotation<RequestBody>() || it.name in requestBodyParamName || it.name == it.type.name.toLowerCaseFirstOne() || method.parameters.size == 1)
 
 
                         val isArray = it.type.isArray
