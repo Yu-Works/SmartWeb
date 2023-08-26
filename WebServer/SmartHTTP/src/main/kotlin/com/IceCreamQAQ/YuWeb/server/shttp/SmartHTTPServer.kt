@@ -99,7 +99,13 @@ class SmartHTTPServer(config: WebServerConfig) : InternalWebServer(config) {
                     }
 
                     when (req.contentType) {
-                        "application/json" -> req.body = JSON.parseObject(request.readBody(request.characterEncoding))
+                        "application/json" -> {
+                            val body = request.readBody(request.characterEncoding)
+                            if (body.startsWith("{") && body.endsWith("}") ) req.body = JSON.parseObject(body)
+                            else if (body.startsWith("[") && body.endsWith("]")) req.bodyArray = JSON.parseArray(body)
+                            else TODO()
+
+                        }
                         "application/xml" -> TODO()
                     }
                 }

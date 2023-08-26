@@ -34,7 +34,7 @@ class Req(private val request: HttpRequest) : Request {
     override val cookies: Array<Cookie> = request.cookies.map { Cookie(it.name, it.value) }.toTypedArray()
 
     override var body: JSONObject? = null
-    override val bodyArray: JSONArray? = null
+    override var bodyArray: JSONArray? = null
     override var uploadFiles: Map<String, ArrayList<UploadFile>>? = null
 
     override val inputStream: InputStream? = null
