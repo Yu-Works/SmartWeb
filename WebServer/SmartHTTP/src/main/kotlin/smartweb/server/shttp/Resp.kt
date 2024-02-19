@@ -1,7 +1,5 @@
-package com.IceCreamQAQ.YuWeb.server.shttp
+package smartweb.server.shttp
 
-import smartweb.http.*
-import org.smartboot.http.common.enums.HttpStatus
 import org.smartboot.http.server.HttpResponse
 import java.io.InputStream
 import java.io.OutputStream

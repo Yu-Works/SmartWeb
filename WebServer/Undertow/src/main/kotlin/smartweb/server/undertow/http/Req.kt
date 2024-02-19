@@ -1,4 +1,4 @@
-package com.IceCreamQAQ.SmartWeb.server.undertow.http
+package smartweb.server.undertow.http
 
 import smartweb.http.*
 import com.alibaba.fastjson2.JSONArray
@@ -7,7 +7,7 @@ import io.undertow.server.HttpServerExchange
 import java.io.InputStream
 import java.net.InetSocketAddress
 
-class Req(internal val exc: HttpServerExchange) : smartweb.http.Request {
+class Req(internal val exc: HttpServerExchange) : Request {
     override val scheme: String
         get() = exc.requestScheme
     override val host: String
@@ -17,8 +17,8 @@ class Req(internal val exc: HttpServerExchange) : smartweb.http.Request {
     override val path: String
         get() = exc.requestPath
     override val method: String = exc.requestMethod.toString()
-    override val headers: Array<smartweb.http.Header> = ArrayList<smartweb.http.Header>().apply {
-        exc.requestHeaders.forEach { it.forEach { value -> add(smartweb.http.Header(it.headerName.toString(), value)) } }
+    override val headers: Array<Header> = ArrayList<Header>().apply {
+        exc.requestHeaders.forEach { it.forEach { value -> add(Header(it.headerName.toString(), value)) } }
     }.toTypedArray()
     override val contentType: String = header("Content-Type")?.value?.split(";")?.get(0)?.trim() ?: ""
     override val charset: String =
@@ -37,8 +37,8 @@ class Req(internal val exc: HttpServerExchange) : smartweb.http.Request {
         internal set
 
     //        get() = HashMap()
-    override val cookies: Array<smartweb.http.Cookie> = exc.requestCookies().map {
-        smartweb.http.Cookie(
+    override val cookies: Array<Cookie> = exc.requestCookies().map {
+        Cookie(
             it.name,
             it.value
         )
@@ -46,7 +46,7 @@ class Req(internal val exc: HttpServerExchange) : smartweb.http.Request {
 
     override var body: JSONObject? = null
     override val bodyArray: JSONArray? = null
-    override val uploadFiles: Map<String, java.util.ArrayList<smartweb.http.UploadFile>>? = null
+    override val uploadFiles: Map<String, java.util.ArrayList<UploadFile>>? = null
 
     override val inputStream: InputStream? = null
 
@@ -56,15 +56,15 @@ class Req(internal val exc: HttpServerExchange) : smartweb.http.Request {
         get() = TODO("Not yet implemented")
     override val clientAddress: InetSocketAddress
         get() = TODO("Not yet implemented")
-    override var cors: smartweb.http.CORS? = null
+    override var cors: CORS? = null
 
-    override val accept: smartweb.http.Accept = smartweb.http.Accept(
+    override val accept: Accept = Accept(
         (header("Accept")?.value ?: "*/*").split(",").map { it.trim() }.toTypedArray(),
         "",
         "",
         ""
     )
-    override lateinit var session: smartweb.http.Session
+    override lateinit var session: Session
 
     override fun getParameterValues(name: String): Array<String>? = parameters[name]
 }

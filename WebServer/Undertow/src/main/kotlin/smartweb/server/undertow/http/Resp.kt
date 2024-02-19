@@ -1,4 +1,4 @@
-package com.IceCreamQAQ.SmartWeb.server.undertow.http
+package smartweb.server.undertow.http
 
 import smartweb.http.*
 import io.undertow.server.HttpServerExchange
@@ -7,7 +7,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.nio.ByteBuffer
 
-class Resp(val exc: HttpServerExchange) : smartweb.http.Response {
+class Resp(val exc: HttpServerExchange) : Response {
 
     companion object {
         private val contentTypeHS = HttpString("Content-Type")
@@ -15,22 +15,22 @@ class Resp(val exc: HttpServerExchange) : smartweb.http.Response {
     }
 
     override var status: Int = 200
-    override val cookies = ArrayList<smartweb.http.Cookie>()
-    override val headers = ArrayList<smartweb.http.Header>()
+    override val cookies = ArrayList<Cookie>()
+    override val headers = ArrayList<Header>()
     override var contentType: String? = null
     override var charset: String? = null
     override var contentLength: Long = -1
 
-    override fun addCookie(cookie: smartweb.http.Cookie) {
+    override fun addCookie(cookie: Cookie) {
         cookies.add(cookie)
     }
 
-    override fun addHeader(header: smartweb.http.Header) {
+    override fun addHeader(header: Header) {
         headers.add(header)
     }
 
     override fun addHeader(key: String, value: String) {
-        headers.add(smartweb.http.Header(key, value))
+        headers.add(Header(key, value))
     }
 
     override val output: OutputStream

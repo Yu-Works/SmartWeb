@@ -1,4 +1,4 @@
-package com.IceCreamQAQ.YuWeb.server.shttp.websocket
+package smartweb.server.shttp.websocket
 
 import smartweb.http.websocket.WsReq
 import org.smartboot.http.server.WebSocketRequest

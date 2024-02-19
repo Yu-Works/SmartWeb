@@ -1,6 +1,5 @@
-package com.IceCreamQAQ.YuWeb.server.shttp
+package smartweb.server.shttp
 
-import smartweb.http.*
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
 import org.smartboot.http.server.HttpRequest

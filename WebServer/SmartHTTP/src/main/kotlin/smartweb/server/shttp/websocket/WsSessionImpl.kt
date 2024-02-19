@@ -1,7 +1,6 @@
-package com.IceCreamQAQ.YuWeb.server.shttp.websocket
+package smartweb.server.shttp.websocket
 
 import smartweb.http.websocket.WsContext
-import smartweb.http.websocket.WsReq
 import smartweb.http.websocket.WsResp
 import smartweb.http.websocket.WsSession
 

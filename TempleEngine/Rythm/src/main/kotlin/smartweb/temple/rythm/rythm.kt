@@ -1,4 +1,4 @@
-package com.IceCreamQAQ.YuWeb.temple.rythm
+package smartweb.temple.rythm
 
 import smartweb.controller.WebActionContext
 import smartweb.temple.Temple
