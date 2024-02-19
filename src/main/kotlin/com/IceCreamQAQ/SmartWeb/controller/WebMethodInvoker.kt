@@ -20,17 +20,17 @@ open class WebMethodInvoker(
         val requestBodyParamName = arrayOf("request", "requestBody", "body")
     }
 
-    fun WebActionContext.readParam(name: String, type: Class<*>): Any? =
+    open fun WebActionContext.readParam(name: String, type: Class<*>): Any? =
         saves[name]?.let {
             if (type.isInstance(it)) return it
             if (it is String) it.stringAsSimple(type)
             else null
         } ?: params.getObject(name, type)
 
-    fun WebActionContext.readParamArray(name: String): JSONArray? = params.getJSONArray(name)
+    open fun WebActionContext.readParamArray(name: String): JSONArray? = params.getJSONArray(name)
 
-    fun WebActionContext.readBody(type: Class<*>): Any? = params.toJavaObject(type)
-    fun WebActionContext.readBodyArray(): JSONArray? = req.bodyArray
+    open fun WebActionContext.readBody(type: Class<*>): Any? = params.toJavaObject(type)
+    open fun WebActionContext.readBodyArray(): JSONArray? = req.bodyArray
 
 
     override fun initParam(method: Method, params: Array<MethodParam<WebActionContext.() -> Any?>>) {
@@ -146,7 +146,7 @@ open class WebMethodInvoker(
         }
     }
 
-    fun Class<*>.isSimpleClass(): Boolean {
+    open fun Class<*>.isSimpleClass(): Boolean {
         return when (this) {
             Int::class.javaPrimitiveType,
             Int::class.javaObjectType,
