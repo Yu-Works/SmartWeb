@@ -5,30 +5,31 @@ import com.IceCreamQAQ.SmartWeb.controller.WebControllerLoader
 import com.IceCreamQAQ.SmartWeb.event.WebServerStatusChangedEvent
 import com.IceCreamQAQ.SmartWeb.http.websocket.WsAction
 import com.IceCreamQAQ.SmartWeb.http.websocket.kotlin.KWsActionCreator
+import com.IceCreamQAQ.SmartWeb.server.EhcacheHelp
 import com.IceCreamQAQ.SmartWeb.server.InternalWebServer
 import com.IceCreamQAQ.SmartWeb.server.WebServerConfig
 import com.IceCreamQAQ.SmartWeb.server.WebServerUploadConfig
-import com.IceCreamQAQ.Yu.annotation
-import com.IceCreamQAQ.Yu.annotation.Config
-import com.IceCreamQAQ.Yu.`as`.ApplicationService
-import com.IceCreamQAQ.Yu.cache.EhcacheHelp
-import com.IceCreamQAQ.Yu.di.YuContext
-import com.IceCreamQAQ.Yu.di.YuContext.Companion.get
-import com.IceCreamQAQ.Yu.di.config.ConfigManager
-import com.IceCreamQAQ.Yu.di.config.ConfigManager.Companion.getConfig
-import com.IceCreamQAQ.Yu.event.EventBus
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ExpiryPolicyBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
+import rain.api.di.DiContext
+import rain.api.di.DiContext.Companion.get
+import rain.api.event.EventBus
+import rain.api.loader.ApplicationService
+import rain.di.Config
+import rain.di.config.ConfigManager
+import rain.di.config.ConfigManager.Companion.getConfig
+import rain.event.EventBusImpl
+import rain.function.annotation
 import java.time.Duration
 
 class WebApp(
-    val context: YuContext,
+    val context: DiContext,
     val configManager: ConfigManager,
     val controllerLoader: WebControllerLoader,
-    val eventBus: EventBus,
+    val eventBus: EventBusImpl,
     @Config("yu.runMode")
     runMode: String?,
     @Config("yu.web.server.default")
@@ -44,8 +45,6 @@ class WebApp(
     init {
         isDevMode = "dev" == runMode
     }
-
-    override fun init() {}
 
     override fun start() {
         var cmb = CacheManagerBuilder.newCacheManagerBuilder()

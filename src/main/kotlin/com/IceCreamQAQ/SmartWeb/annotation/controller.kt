@@ -2,7 +2,7 @@ package com.IceCreamQAQ.SmartWeb.annotation
 
 import com.IceCreamQAQ.SmartWeb.controller.WebControllerLoader
 import com.IceCreamQAQ.SmartWeb.http.HttpMethod
-import com.IceCreamQAQ.Yu.annotation.LoadBy
+import rain.api.annotation.LoadBy
 
 @LoadBy(WebControllerLoader::class)
 annotation class WebController

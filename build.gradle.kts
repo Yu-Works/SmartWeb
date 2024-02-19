@@ -2,7 +2,7 @@ plugins {
     java
     kotlin("jvm") version "1.8.0"
 }
-val coreVersion = "Yu-Core:0.4.0"
+val coreVersion = "1.0.0-DEV1"
 
 
 
@@ -10,7 +10,7 @@ allprojects {
     version = "0.1.2"
     val dir = projectDir.absolutePath.split(File.separator)
     val l2 = dir[dir.size - 2]
-    group = if (name == "SmartWeb") "com.IceCreamQAQ"
+    group = if (name == "SmartWeb") "com.IceCreamQAQ.SmartWeb"
     else if (l2 == "TempleEngine") "com.IceCreamQAQ.SmartWeb.Temple"
     else if (l2 == "WebServer") "com.IceCreamQAQ.SmartWeb.Server"
     else "com.IceCreamQAQ.Yu.WebCore"
@@ -78,7 +78,9 @@ allprojects {
 
 
     dependencies {
-        implementation("com.IceCreamQAQ:$coreVersion")
+        implementation("com.IceCreamQAQ.Rain:event:$coreVersion")
+        implementation("com.IceCreamQAQ.Rain:application:$coreVersion")
+        implementation("com.IceCreamQAQ.Rain:controller:$coreVersion")
         implementation("commons-fileupload:commons-fileupload:1.5")
     }
 
@@ -86,6 +88,7 @@ allprojects {
 
 dependencies {
     implementation(kotlin("stdlib"))
+    api("org.ehcache:ehcache:3.10.1")
 }
 
 

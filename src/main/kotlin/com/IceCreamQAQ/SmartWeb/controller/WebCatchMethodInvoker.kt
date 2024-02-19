@@ -1,6 +1,6 @@
 package com.IceCreamQAQ.SmartWeb.controller
 
-import com.IceCreamQAQ.Yu.controller.ControllerInstanceGetter
+import rain.controller.ControllerInstanceGetter
 import java.lang.reflect.Method
 
 class WebCatchMethodInvoker(

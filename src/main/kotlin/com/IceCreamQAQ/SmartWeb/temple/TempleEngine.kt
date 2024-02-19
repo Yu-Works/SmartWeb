@@ -1,6 +1,7 @@
 package com.IceCreamQAQ.SmartWeb.temple
 
-import com.IceCreamQAQ.Yu.annotation.AutoBind
+import rain.api.annotation.AutoBind
+
 
 @AutoBind
 interface TempleEngine {

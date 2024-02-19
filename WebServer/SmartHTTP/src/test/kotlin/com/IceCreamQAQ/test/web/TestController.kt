@@ -4,9 +4,6 @@ import com.IceCreamQAQ.SmartWeb.annotation.PostAction
 import com.IceCreamQAQ.SmartWeb.annotation.WebAction
 import com.IceCreamQAQ.SmartWeb.annotation.WebController
 import com.IceCreamQAQ.SmartWeb.http.UploadFile
-import com.IceCreamQAQ.Yu.validation.Max
-import com.IceCreamQAQ.Yu.validation.Min
-import com.IceCreamQAQ.Yu.validation.Valid
 import java.io.File
 
 class Tcp {
@@ -17,11 +14,8 @@ class Tcp {
 
 data class Entity1(val id: Int, val name: String)
 
-@Valid
 data class Entity2(
     val id: Int,
-    @field:Min(10)
-    @field:Max(150)
     val height: Int
 )
 
@@ -63,13 +57,13 @@ class TestController {
 //    fun tcp(testName: String) = "你好 $testName。"
 //
     @WebAction("tvn")
-    fun tvn(@Min(50) @Max(100) tn: Long) = "测试数值：$tn。"
+    fun tvn(tn: Long) = "测试数值：$tn。"
 
     data class User(val name: String, val sex: Boolean?)
 
     @WebAction("update/{id}")
     fun update(user: User, id: Int) {
-
+        println("update: $user, $id")
     }
 
     @PostAction("testUpload")
