@@ -1,9 +1,9 @@
 package com.IceCreamQAQ.test.web
 
-import com.IceCreamQAQ.SmartWeb.annotation.PostAction
-import com.IceCreamQAQ.SmartWeb.annotation.WebAction
-import com.IceCreamQAQ.SmartWeb.annotation.WebController
-import com.IceCreamQAQ.SmartWeb.http.UploadFile
+import smartweb.annotation.PostAction
+import smartweb.annotation.WebAction
+import smartweb.annotation.WebController
+import smartweb.http.UploadFile
 import java.io.File
 
 class Tcp {
@@ -67,7 +67,7 @@ class TestController {
     }
 
     @PostAction("testUpload")
-    fun testUpload(file: UploadFile) = file
+    fun testUpload(file: smartweb.http.UploadFile) = file
 //
 ////    @Action("tcv")
 ////    fun tcv(tcv: Test) = tcv

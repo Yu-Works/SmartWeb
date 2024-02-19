@@ -1,10 +1,10 @@
 package com.IceCreamQAQ.SmartWeb.server.undertow
 
-import com.IceCreamQAQ.SmartWeb.server.undertow.http.Req
-import com.IceCreamQAQ.SmartWeb.server.undertow.http.Resp
-import com.IceCreamQAQ.SmartWeb.http.websocket.WsAction
-import com.IceCreamQAQ.SmartWeb.server.InternalWebServer
-import com.IceCreamQAQ.SmartWeb.server.WebServerConfig
+import smartweb.server.undertow.http.Req
+import smartweb.server.undertow.http.Resp
+import smartweb.http.websocket.WsAction
+import smartweb.server.InternalWebServer
+import smartweb.server.WebServerConfig
 import com.alibaba.fastjson2.JSON
 import io.undertow.Undertow
 import io.undertow.util.URLUtils

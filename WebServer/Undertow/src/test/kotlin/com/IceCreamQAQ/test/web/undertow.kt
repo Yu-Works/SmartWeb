@@ -1,7 +1,7 @@
 package com.IceCreamQAQ.test.web
 
-import com.IceCreamQAQ.SmartWeb.server.undertow.http.Req
-import com.IceCreamQAQ.SmartWeb.server.undertow.http.Resp
+import smartweb.server.undertow.http.Req
+import smartweb.server.undertow.http.Resp
 import com.IceCreamQAQ.YuWeb.InternalWebServer
 import io.undertow.Undertow
 import io.undertow.server.HttpServerExchange

@@ -1,8 +1,8 @@
 package com.IceCreamQAQ.YuWeb.temple.rythm
 
-import com.IceCreamQAQ.SmartWeb.controller.WebActionContext
-import com.IceCreamQAQ.SmartWeb.temple.Temple
-import com.IceCreamQAQ.SmartWeb.temple.TempleEngine
+import smartweb.controller.WebActionContext
+import smartweb.temple.Temple
+import smartweb.temple.TempleEngine
 import org.rythmengine.Rythm
 import org.rythmengine.RythmEngine
 import java.io.File

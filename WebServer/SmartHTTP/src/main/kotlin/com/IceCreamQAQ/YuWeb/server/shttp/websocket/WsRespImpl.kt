@@ -1,6 +1,6 @@
 package com.IceCreamQAQ.YuWeb.server.shttp.websocket
 
-import com.IceCreamQAQ.SmartWeb.http.websocket.WsResp
+import smartweb.http.websocket.WsResp
 import org.smartboot.http.server.WebSocketResponse
 
 class WsRespImpl(private val real: WebSocketResponse) : WsResp {

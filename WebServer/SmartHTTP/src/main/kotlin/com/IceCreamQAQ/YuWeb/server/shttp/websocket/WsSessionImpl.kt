@@ -1,9 +1,9 @@
 package com.IceCreamQAQ.YuWeb.server.shttp.websocket
 
-import com.IceCreamQAQ.SmartWeb.http.websocket.WsContext
-import com.IceCreamQAQ.SmartWeb.http.websocket.WsReq
-import com.IceCreamQAQ.SmartWeb.http.websocket.WsResp
-import com.IceCreamQAQ.SmartWeb.http.websocket.WsSession
+import smartweb.http.websocket.WsContext
+import smartweb.http.websocket.WsReq
+import smartweb.http.websocket.WsResp
+import smartweb.http.websocket.WsSession
 
 class WsSessionImpl(
     override val context: WsContext,

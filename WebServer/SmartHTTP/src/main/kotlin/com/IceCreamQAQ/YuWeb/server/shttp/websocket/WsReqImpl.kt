@@ -1,6 +1,6 @@
 package com.IceCreamQAQ.YuWeb.server.shttp.websocket
 
-import com.IceCreamQAQ.SmartWeb.http.websocket.WsReq
+import smartweb.http.websocket.WsReq
 import org.smartboot.http.server.WebSocketRequest
 import java.net.InetSocketAddress
 

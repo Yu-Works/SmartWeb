@@ -1,10 +1,10 @@
 package com.IceCreamQAQ.YuWeb.server.shttp
 
-import com.IceCreamQAQ.SmartWeb.http.CommonsFileUploadFile
-import com.IceCreamQAQ.SmartWeb.http.UploadFile
-import com.IceCreamQAQ.SmartWeb.http.websocket.WsAction
-import com.IceCreamQAQ.SmartWeb.server.InternalWebServer
-import com.IceCreamQAQ.SmartWeb.server.WebServerConfig
+import smartweb.http.CommonsFileUploadFile
+import smartweb.http.UploadFile
+import smartweb.http.websocket.WsAction
+import smartweb.server.InternalWebServer
+import smartweb.server.WebServerConfig
 import com.IceCreamQAQ.YuWeb.server.shttp.websocket.WsHandler
 import com.alibaba.fastjson2.JSON
 import com.alibaba.fastjson2.JSONObject
@@ -65,7 +65,7 @@ class SmartHTTPServer(config: WebServerConfig) : InternalWebServer(config) {
                         factory.sizeThreshold = writeTmpFileSize
 //                        factory
 
-                        val uploadMap = HashMap<String, ArrayList<UploadFile>>()
+                        val uploadMap = HashMap<String, ArrayList<smartweb.http.UploadFile>>()
                         val paramMap = HashMap<String, ArrayList<String>>()
 
                         val uploads = FileUpload(factory).parseRequest(object : RequestContext {
@@ -78,7 +78,7 @@ class SmartHTTPServer(config: WebServerConfig) : InternalWebServer(config) {
                                 val list = paramMap.getOrPut(it.fieldName) { ArrayList() }
                                 list.add(it.string)
                             } else {
-                                val uploadFile = CommonsFileUploadFile(it)
+                                val uploadFile = smartweb.http.CommonsFileUploadFile(it)
                                 val list = uploadMap.getOrPut(it.fieldName) { ArrayList() }
                                 list.add(uploadFile)
                             }

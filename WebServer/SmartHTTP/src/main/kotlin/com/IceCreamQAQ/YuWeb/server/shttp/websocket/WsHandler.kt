@@ -1,8 +1,8 @@
 package com.IceCreamQAQ.YuWeb.server.shttp.websocket
 
-import com.IceCreamQAQ.SmartWeb.http.websocket.WsAction
-import com.IceCreamQAQ.SmartWeb.http.websocket.WsContext
-import com.IceCreamQAQ.SmartWeb.http.websocket.WsSession
+import smartweb.http.websocket.WsAction
+import smartweb.http.websocket.WsContext
+import smartweb.http.websocket.WsSession
 import com.IceCreamQAQ.YuWeb.server.shttp.SmartHTTPServer
 import org.smartboot.http.server.WebSocketRequest
 import org.smartboot.http.server.WebSocketResponse

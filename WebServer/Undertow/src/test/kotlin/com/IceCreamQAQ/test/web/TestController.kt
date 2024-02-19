@@ -1,7 +1,7 @@
 package com.IceCreamQAQ.test.web
 
-import com.IceCreamQAQ.SmartWeb.event.WebServerStatusChangedEvent
-import com.IceCreamQAQ.SmartWeb.http.websocket.kotlin.KWsActionCreator.Companion.newWs
+import smartweb.event.WebServerStatusChangedEvent
+import smartweb.http.websocket.kotlin.KWsActionCreator.Companion.newWs
 import com.IceCreamQAQ.Yu.annotation.Action
 import com.IceCreamQAQ.Yu.annotation.Catch
 import com.IceCreamQAQ.Yu.annotation.Event
