@@ -61,6 +61,7 @@ open class WebMethodInvoker(
                             else files[0]
                         }
                     }
+
                     else -> {
                         it.annotation<SessionValue> {
                             if (it.type == ReferenceValue::class.java)
@@ -148,7 +149,23 @@ open class WebMethodInvoker(
 
     fun Class<*>.isSimpleClass(): Boolean {
         return when (this) {
-            Int::class.java, Long::class.java, Float::class.java, Double::class.java, Boolean::class.java, Char::class.java, Byte::class.java, Short::class.java -> true
+            Int::class.javaPrimitiveType,
+            Int::class.javaObjectType,
+            Long::class.javaPrimitiveType,
+            Long::class.javaObjectType,
+            Float::class.javaPrimitiveType,
+            Float::class.javaObjectType,
+            Double::class.javaPrimitiveType,
+            Double::class.javaObjectType,
+            Boolean::class.javaPrimitiveType,
+            Boolean::class.javaObjectType,
+            Char::class.javaPrimitiveType,
+            Char::class.javaObjectType,
+            Byte::class.javaPrimitiveType,
+            Byte::class.javaObjectType,
+            Short::class.javaPrimitiveType,
+            Short::class.javaObjectType -> true
+
             else -> false
         }
     }
