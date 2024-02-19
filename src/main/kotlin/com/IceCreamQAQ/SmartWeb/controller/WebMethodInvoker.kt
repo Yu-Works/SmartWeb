@@ -34,7 +34,6 @@ open class WebMethodInvoker(
 
 
     override fun initParam(method: Method, params: Array<MethodParam<WebActionContext.() -> Any?>>) {
-        var effectiveParam = 0
 
         params.forEach {
 
