@@ -104,7 +104,7 @@ class WebControllerLoader(
 
     override fun postLoad() {
         rootRouterMap.apply {
-            rootInfoMap.forEach { name, rootInfo ->
+            rootInfoMap.forEach { (name, rootInfo) ->
                 put(name, RootRouter(rootInfo.router, ArrayList<ActionInfo<WebActionContext>>().apply {
                     rootInfo.controllers.forEach { cpfi ->
                         cpfi.actions.forEach { add(ActionInfo(it.actionClass, it.actionMethod, it.creator())) }
