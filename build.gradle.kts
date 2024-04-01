@@ -1,6 +1,6 @@
 plugins {
     java
-    kotlin("jvm") version "1.8.0"
+    kotlin("jvm") version "1.9.22"
 }
 val coreVersion = "1.0.0-DEV1"
 
