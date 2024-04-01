@@ -17,6 +17,7 @@ allprojects {
 
     repositories {
         mavenLocal()
+        mavenCentral()
         maven("https://maven.icecreamqaq.com/repository/maven-public/")
     }
 
