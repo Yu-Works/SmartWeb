@@ -73,7 +73,7 @@ class WebControllerLoader(
         catchProcesses: Array<ProcessInvoker<WebActionContext>>
     ): DssActionInvoker<WebActionContext> =
         WebActionInvoker(
-            channels.map { smartweb.http.HttpMethod.valueOf(it) },
+            channels.map { HttpMethod.valueOf(it) },
             "${actionClass.name.replace(".", "/")}/${actionMethod.name}.html".let { templePath ->
                 templeEngines.forEachFirstOrNull { it.getTemple(templePath) }
             },
