@@ -3,11 +3,10 @@ plugins {
     kotlin("jvm") version "1.9.22"
 }
 val coreVersion = "1.0.0-DEV1"
-
+version = "1.0.0-DEV1"
 
 
 allprojects {
-    version = "0.1.2"
     val dir = projectDir.absolutePath.split(File.separator)
     val l2 = dir[dir.size - 2]
     group = if (name == "SmartWeb") "com.IceCreamQAQ.SmartWeb"
@@ -32,7 +31,7 @@ allprojects {
             create<MavenPublication>(name) {
                 groupId = project.group.toString()
                 artifactId = name
-                version = version.toString()
+                version = rootProject.version.toString()
 
                 pom {
                     name.set("Rain Java Dev Framework")
