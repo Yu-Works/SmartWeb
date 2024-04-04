@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.JSON
 import com.alibaba.fastjson2.JSONArray
 import kotlinx.coroutines.CoroutineScope
 import rain.function.subStringByLast
+import smartweb.controller.WebActionContext.Companion.setUser
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
@@ -31,6 +32,8 @@ abstract class InternalWebServer(
     val sessionCache: EhcacheHelp<smartweb.http.Session> = config.sessionCache
     val cors: Boolean
     val corsDomain: Array<String>
+
+    val provider: WebUserProvider? = config.userProvider
 
     val tmpLocation = File(config.upload.tempDir + "/SmartWeb/${UUID.randomUUID()}")
         .apply { if (!exists()) mkdirs() }
@@ -111,6 +114,8 @@ abstract class InternalWebServer(
         }
 
         req.body?.forEach { (k, v) -> context.params[k] = v }
+
+        provider?.invoke(context)?.let { context.setUser(it) }
 
         val routerMatch: Boolean
         try {

@@ -10,5 +10,6 @@ data class WebServerConfig(
     val cors: String?,
     val upload: WebServerUploadConfig,
     val rootRouter: WebRootRouter,
-    val sessionCache: EhcacheHelp<smartweb.http.Session>
+    val sessionCache: EhcacheHelp<smartweb.http.Session>,
+    val userProvider: WebUserProvider?
 )
