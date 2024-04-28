@@ -2,6 +2,7 @@ package smartweb.controller
 
 import smartweb.annotation.*
 import com.alibaba.fastjson2.JSONArray
+import rain.api.permission.IUser
 import rain.controller.ActionContext
 import rain.controller.ControllerInstanceGetter
 import rain.controller.simple.SimpleKJReflectMethodInvoker
@@ -101,6 +102,9 @@ open class WebMethodInvoker(
                                 valueGetter { ReferenceValue(this[it.name]) { v -> this[it.name] = v } }
                             else valueGetter { this[it.name] }
                         }
+
+                        if (IUser::class.java.isAssignableFrom(it.type))
+                            valueGetter { this.user }
 
 
                         val isSimple = it.relType.realClass.isSimpleClass()
