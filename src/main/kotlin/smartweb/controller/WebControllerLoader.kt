@@ -20,9 +20,7 @@ import java.lang.reflect.Method
 class WebControllerLoader(
     context: DiContext,
     val templeEngines: List<TempleEngine> = arrayListOf()
-) : DssControllerLoader<WebActionContext, WebRouter, WebRootInfo>(
-    context
-) {
+) : DssControllerLoader<WebActionContext, WebRouter, WebRootInfo>(context) {
 
     val rootInfoMap = HashMap<String, WebRootInfo>()
     val rootRouterMap = HashMap<String, WebRootRouter>()
@@ -57,7 +55,7 @@ class WebControllerLoader(
         actionMethod.annotation<PostAction> { return value to listOf("POST") }
         actionMethod.annotation<PutAction> { return value to listOf("PUT") }
         actionMethod.annotation<DeleteAction> { return value to listOf("DELETE") }
-        actionMethod.annotation<NewWs> { return value to  listOf("WebSocket") }
+        actionMethod.annotation<NewWs> { return value to listOf("WebSocket") }
         return null
     }
 
