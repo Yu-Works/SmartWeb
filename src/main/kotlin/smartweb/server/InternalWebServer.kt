@@ -29,7 +29,7 @@ abstract class InternalWebServer(
     val port: Int = config.port
     val isDevMode: Boolean = config.isDevMode
     val rootRouter: WebRootRouter = config.rootRouter
-    val sessionCache: EhcacheHelp<smartweb.http.Session> = config.sessionCache
+    val sessionCache: EhcacheHelp<Session> = config.sessionCache
     val cors: Boolean
     val corsDomain: Array<String>
 
@@ -65,18 +65,12 @@ abstract class InternalWebServer(
     abstract fun start()
     abstract fun stop()
 
-    open fun findSession(id: String?, resp: smartweb.http.Response): smartweb.http.Session {
-        val sid = id ?: UUID.randomUUID().toString().also { resp.addCookie(
-            smartweb.http.Cookie(
-                sessionCookieName,
-                it,
-                true
-            )
-        ) }
-        return sessionCache.getOrPut(sid, smartweb.http.Session(sid, HashMap()))
+    open fun findSession(id: String?, resp: Response): Session {
+        val sid = id ?: UUID.randomUUID().toString().also { resp.addCookie(Cookie(sessionCookieName, it, true)) }
+        return sessionCache.getOrPut(sid) { Session(sid, HashMap()) }
     }
 
-    open suspend fun onRequest(req: smartweb.http.Request, resp: smartweb.http.Response) {
+    open suspend fun onRequest(req: Request, resp: Response) {
         val method = req.method
 
         val origin = req.header("Origin")?.value
@@ -97,7 +91,7 @@ abstract class InternalWebServer(
             return
         }
 
-        val methodEnum = smartweb.http.HttpMethod.valueOf(method)
+        val methodEnum = HttpMethod.valueOf(method)
 
         val path = req.path
         val p = path.substring(1, path.length).split("/")
@@ -178,7 +172,7 @@ abstract class InternalWebServer(
             is Byte -> resultByByteArray(byteArrayOf(obj))
             is ByteArray -> resultByByteArray(obj)
             is InputStream -> resultByInputStream(obj)
-            is smartweb.http.UploadFile -> {
+            is UploadFile -> {
                 val suffix = obj.name.let { it.substring(it.lastIndexOf(".") + 1) }
                 val contentType = defaultFileContentType[suffix] ?: run {
                     resp.addHeader("Content-Disposition", "filename=\"${obj.name}\"")
@@ -186,6 +180,7 @@ abstract class InternalWebServer(
                 }
                 resultByInputStream(obj.inputStream, contentType, obj.size)
             }
+
             is File -> {
                 val suffix = obj.name.let { it.substring(it.lastIndexOf(".") + 1) }
                 val contentType = defaultFileContentType[suffix] ?: run {
@@ -194,7 +189,8 @@ abstract class InternalWebServer(
                 }
                 resultByInputStream(FileInputStream(obj), contentType, obj.length())
             }
-            is smartweb.http.DownloadFile ->{
+
+            is DownloadFile -> {
                 resp.addHeader("Content-Disposition", "filename=\"${obj.name}\"")
                 resultByInputStream(obj.input, obj.contentType, obj.length)
             }
