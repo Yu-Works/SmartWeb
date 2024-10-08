@@ -8,14 +8,14 @@ import rain.api.annotation.LoadBy
 annotation class WebController
 
 annotation class WebAction(
-    val value: String,
-    vararg val methods: smartweb.http.HttpMethod = [smartweb.http.HttpMethod.GET, smartweb.http.HttpMethod.POST, smartweb.http.HttpMethod.PUT, smartweb.http.HttpMethod.DELETE]
+    val value: String = "",
+    vararg val methods: HttpMethod = [HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE]
 )
 
-annotation class GetAction(val value: String)
-annotation class PostAction(val value: String)
-annotation class PutAction(val value: String)
-annotation class DeleteAction(val value: String)
+annotation class GetAction(val value: String = "")
+annotation class PostAction(val value: String = "")
+annotation class PutAction(val value: String = "")
+annotation class DeleteAction(val value: String = "")
 
 annotation class RequestBody
 annotation class RequestParam
