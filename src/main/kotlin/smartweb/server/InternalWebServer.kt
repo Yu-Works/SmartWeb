@@ -153,7 +153,10 @@ abstract class InternalWebServer(
     }
 
     open fun WebActionContext.buildResult(obj: Any?) {
-        if (obj is Render) return obj.doRender(this, this@InternalWebServer)
+        var result = obj
+        // 执行逻辑，先判断 result 是否是 Render 如果是 Render 则调用其 invoke 方法。
+        // 如果方法没有返回值，则认定 Render 操作完毕，否则，则认为 Render 返回结果需要继续按逻辑处理。
+        if (result is Render) result(this, this@InternalWebServer)?.also { result = it } ?: return
         invoker?.temple?.let {
             if (req.accept.mediaType[0] == "text/html") {
                 resultByString(it.invoke(this), "text/html")
@@ -164,38 +167,38 @@ abstract class InternalWebServer(
         fun statusCode(code: Int) {
             resp.status = code
         }
-        if (obj == null && requestMethod == smartweb.http.HttpMethod.POST) return statusCode(201)
-        if (obj == null) return statusCode(204)
+        if (result == null && requestMethod == smartweb.http.HttpMethod.POST) return statusCode(201)
+        if (result == null) return statusCode(204)
 
-        when (obj) {
-            is String -> makeStringHeader(obj).let { resultByString(it.first, it.second) }
-            is Byte -> resultByByteArray(byteArrayOf(obj))
-            is ByteArray -> resultByByteArray(obj)
-            is InputStream -> resultByInputStream(obj)
+        when (result) {
+            is String -> makeStringHeader(result).let { resultByString(it.first, it.second) }
+            is Byte -> resultByByteArray(byteArrayOf(result))
+            is ByteArray -> resultByByteArray(result)
+            is InputStream -> resultByInputStream(result)
             is UploadFile -> {
-                val suffix = obj.name.let { it.substring(it.lastIndexOf(".") + 1) }
+                val suffix = result.name.let { it.substring(it.lastIndexOf(".") + 1) }
                 val contentType = defaultFileContentType[suffix] ?: run {
-                    resp.addHeader("Content-Disposition", "filename=\"${obj.name}\"")
+                    resp.addHeader("Content-Disposition", "filename=\"${result.name}\"")
                     "application/octet-stream"
                 }
-                resultByInputStream(obj.inputStream, contentType, obj.size)
+                resultByInputStream(result.inputStream, contentType, result.size)
             }
 
             is File -> {
-                val suffix = obj.name.let { it.substring(it.lastIndexOf(".") + 1) }
+                val suffix = result.name.let { it.substring(it.lastIndexOf(".") + 1) }
                 val contentType = defaultFileContentType[suffix] ?: run {
-                    resp.addHeader("Content-Disposition", "filename=\"${obj.name}\"")
+                    resp.addHeader("Content-Disposition", "filename=\"${result.name}\"")
                     "application/octet-stream"
                 }
-                resultByInputStream(FileInputStream(obj), contentType, obj.length())
+                resultByInputStream(FileInputStream(result), contentType, result.length())
             }
 
             is DownloadFile -> {
-                resp.addHeader("Content-Disposition", "filename=\"${obj.name}\"")
-                resultByInputStream(obj.input, obj.contentType, obj.length)
+                resp.addHeader("Content-Disposition", "filename=\"${result.name}\"")
+                resultByInputStream(result.input, result.contentType, result.length)
             }
 
-            else -> resultByString(JSON.toJSONString(obj), "application/json")
+            else -> resultByString(JSON.toJSONString(result), "application/json")
         }
     }
 
