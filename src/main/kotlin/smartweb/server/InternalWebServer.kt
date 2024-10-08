@@ -152,11 +152,13 @@ abstract class InternalWebServer(
         buildResult(result)
     }
 
-    open fun WebActionContext.buildResult(obj: Any?) {
-        var result = obj
+    open fun WebActionContext.buildResult(result: Any?) {
         // 执行逻辑，先判断 result 是否是 Render 如果是 Render 则调用其 invoke 方法。
         // 如果方法没有返回值，则认定 Render 操作完毕，否则，则认为 Render 返回结果需要继续按逻辑处理。
-        if (result is Render) result(this, this@InternalWebServer)?.also { result = it } ?: return
+        if (result is Render) {
+            result(this, this@InternalWebServer)?.let { buildResult(it) }
+            return
+        }
         invoker?.temple?.let {
             if (req.accept.mediaType[0] == "text/html") {
                 resultByString(it.invoke(this), "text/html")
