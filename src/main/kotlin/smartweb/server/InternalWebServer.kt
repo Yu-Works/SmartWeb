@@ -26,14 +26,16 @@ abstract class InternalWebServer(
 
     open val enableMethod: Array<String> = arrayOf("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD")
 
-    val port: Int = config.port
-    val isDevMode: Boolean = config.isDevMode
-    val rootRouter: WebRootRouter = config.rootRouter
-    val sessionCache: EhcacheHelp<Session> = config.sessionCache
-    val cors: Boolean
-    val corsDomain: Array<String>
+    open val port: Int = config.port
+    open val isDevMode: Boolean = config.isDevMode
+    open val rootRouter: WebRootRouter = config.rootRouter
+    open val sessionCache: EhcacheHelp<Session> = config.sessionCache
+    open val cors: Boolean = config.cors != null
+    open val corsDomain: Array<String> =
+        if (cors) config.cors!!.split(",").map { it.trim() }.toTypedArray()
+        else arrayOf()
 
-    val provider: WebUserProvider? = config.userProvider
+    open val provider: WebUserProvider? = config.userProvider
 
     val tmpLocation = File(config.upload.tempDir + "/SmartWeb/${UUID.randomUUID()}")
         .apply { if (!exists()) mkdirs() }
@@ -54,13 +56,6 @@ abstract class InternalWebServer(
 
 
     abstract val pool: CoroutineScope
-
-    init {
-        cors = config.cors != null
-        corsDomain =
-            if (cors) config.cors!!.split(",").map { it.trim() }.toTypedArray()
-            else arrayOf()
-    }
 
     abstract fun start()
     abstract fun stop()
@@ -169,7 +164,7 @@ abstract class InternalWebServer(
         fun statusCode(code: Int) {
             resp.status = code
         }
-        if (result == null && requestMethod == smartweb.http.HttpMethod.POST) return statusCode(201)
+        if (result == null && requestMethod == HttpMethod.POST) return statusCode(201)
         if (result == null) return statusCode(204)
 
         when (result) {

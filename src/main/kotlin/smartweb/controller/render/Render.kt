@@ -28,12 +28,12 @@ fun render302(location: String): Nothing = Render { context, _ ->
     null
 }.render()
 
-fun render401(body: Any? = null): Nothing = Render { context, _ ->
+fun render401(body: Any? = ""): Nothing = Render { context, _ ->
     context.resp.status = 401
     body
 }.render()
 
-fun render403(body: Any? = null): Nothing = Render { context, _ ->
+fun render403(body: Any? = ""): Nothing = Render { context, _ ->
     context.resp.status = 403
     body
 }.render()
