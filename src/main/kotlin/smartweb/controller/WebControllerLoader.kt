@@ -14,10 +14,12 @@ import rain.controller.dss.DssControllerLoader
 import rain.controller.dss.router.DssRouter
 import rain.controller.dss.router.DynamicRouter
 import rain.controller.dss.router.RouterMatcher
+import rain.di.Config
 import rain.function.annotation
 import java.lang.reflect.Method
 
 class WebControllerLoader(
+    @Config("smart.web.controller.contextValueKeys") val contextValueKeys: List<String> = emptyList(),
     context: DiContext,
     val templeEngines: List<TempleEngine> = arrayListOf()
 ) : DssControllerLoader<WebActionContext, WebRouter, WebRootInfo>(context) {
@@ -77,7 +79,7 @@ class WebControllerLoader(
             },
             level,
             matchers,
-            WebMethodInvoker(actionMethod, instanceGetter),
+            WebMethodInvoker(actionMethod, instanceGetter, contextValueKeys).init(),
             beforeProcesses,
             afterProcesses,
             catchProcesses
@@ -89,7 +91,7 @@ class WebControllerLoader(
         targetMethod: Method,
         instanceGetter: ControllerInstanceGetter
     ): ProcessInvoker<WebActionContext> =
-        WebMethodInvoker(targetMethod, instanceGetter)
+        WebMethodInvoker(targetMethod, instanceGetter, contextValueKeys).init()
 
     override fun createCatchMethodInvoker(
         throwableType: Class<out Throwable>,
@@ -97,7 +99,7 @@ class WebControllerLoader(
         targetMethod: Method,
         instanceGetter: ControllerInstanceGetter
     ): ProcessInvoker<WebActionContext> =
-        WebCatchMethodInvoker(targetMethod, instanceGetter, throwableType)
+        WebCatchMethodInvoker(targetMethod, instanceGetter, throwableType, contextValueKeys).init()
 
 
     override fun postLoad() {

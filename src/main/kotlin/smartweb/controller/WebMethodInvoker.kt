@@ -9,11 +9,13 @@ import rain.controller.simple.SimpleKJReflectMethodInvoker
 import rain.controller.simple.SimpleKJReflectMethodInvoker.MethodParam.Companion.annotation
 import rain.controller.simple.SimpleKJReflectMethodInvoker.MethodParam.Companion.hasAnnotation
 import rain.function.toLowerCaseFirstOne
+import smartweb.http.*
 import java.lang.reflect.Method
 
 open class WebMethodInvoker(
     method: Method,
-    instance: ControllerInstanceGetter
+    instance: ControllerInstanceGetter,
+    private val contextValueKeys: List<String>
 ) : SimpleKJReflectMethodInvoker<WebActionContext, WebActionContext.() -> Any?>(method, instance) {
 
     companion object {
@@ -49,11 +51,11 @@ open class WebMethodInvoker(
             kotlin.runCatching {
                 when (it.type) {
                     ActionContext::class.java, WebActionContext::class.java -> valueGetter { this }
-                    smartweb.http.Request::class.java -> valueGetter { req }
-                    smartweb.http.Response::class.java -> valueGetter { resp }
-                    smartweb.http.Session::class.java -> valueGetter { this.req.session }
-                    smartweb.http.Cookie::class.java -> valueGetter { this.req.cookie(it.name) }
-                    smartweb.http.UploadFile::class.java -> valueGetter {
+                    Request::class.java -> valueGetter { req }
+                    Response::class.java -> valueGetter { resp }
+                    Session::class.java -> valueGetter { this.req.session }
+                    Cookie::class.java -> valueGetter { this.req.cookie(it.name) }
+                    UploadFile::class.java -> valueGetter {
                         req.uploadFiles?.get(it.name)?.let { files ->
                             if (files.size > 1)
                                 error("遇到多个文件上传参数 ${it.name}，但参数只接受单个上传文件！")
@@ -97,7 +99,7 @@ open class WebMethodInvoker(
                             }
                         }
 
-                        it.annotation<ContextValue> {
+                        if (it.hasAnnotation<ContextValue>() || it.name in contextValueKeys) {
                             if (it.type == ReferenceValue::class.java)
                                 valueGetter { ReferenceValue(this[it.name]) { v -> this[it.name] = v } }
                             else valueGetter { this[it.name] }
