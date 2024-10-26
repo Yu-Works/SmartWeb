@@ -61,7 +61,9 @@ abstract class InternalWebServer(
     abstract fun stop()
 
     open fun findSession(id: String?, resp: Response): Session {
-        val sid = id ?: UUID.randomUUID().toString().also { resp.addCookie(Cookie(sessionCookieName, it, true)) }
+        val sid = id ?: UUID.randomUUID()
+            .toString()
+            .also { resp.addCookie(Cookie(sessionCookieName, it, true, path = "/")) }
         return sessionCache.getOrPut(sid) { Session(sid, HashMap()) }
     }
 
@@ -163,6 +165,7 @@ abstract class InternalWebServer(
 
         fun statusCode(code: Int) {
             resp.status = code
+            resp.write()
         }
         if (result == null && requestMethod == HttpMethod.POST) return statusCode(201)
         if (result == null) return statusCode(204)
