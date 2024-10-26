@@ -14,6 +14,7 @@ import rain.controller.dss.DssControllerLoader
 import rain.controller.dss.router.DssRouter
 import rain.controller.dss.router.DynamicRouter
 import rain.controller.dss.router.RouterMatcher
+import rain.controller.simple.SimpleCatchMethodInvoker
 import rain.di.Config
 import rain.function.annotation
 import java.lang.reflect.Method
@@ -99,7 +100,7 @@ class WebControllerLoader(
         targetMethod: Method,
         instanceGetter: ControllerInstanceGetter
     ): ProcessInvoker<WebActionContext> =
-        WebCatchMethodInvoker(targetMethod, instanceGetter, throwableType, contextValueKeys).init()
+        SimpleCatchMethodInvoker(throwableType, WebMethodInvoker(targetMethod, instanceGetter, contextValueKeys).init())
 
 
     override fun postLoad() {

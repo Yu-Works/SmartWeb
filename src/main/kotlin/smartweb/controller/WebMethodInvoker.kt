@@ -62,6 +62,7 @@ open class WebMethodInvoker(
                             else files[0]
                         }
                     }
+                    Exception::class.java -> valueGetter { this.runtimeError }
 
                     else -> {
                         it.annotation<SessionValue> {
