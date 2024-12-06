@@ -165,6 +165,7 @@ abstract class InternalWebServer(
 
         fun statusCode(code: Int) {
             resp.status = code
+            resp.contentLength = 0
             resp.write()
         }
         if (result == null && requestMethod == HttpMethod.POST) return statusCode(201)

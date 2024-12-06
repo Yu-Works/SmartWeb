@@ -1,5 +1,6 @@
 package smartweb.controller
 
+import com.alibaba.fastjson2.JSON
 import smartweb.annotation.*
 import com.alibaba.fastjson2.JSONArray
 import rain.api.permission.IUser
@@ -31,7 +32,7 @@ open class WebMethodInvoker(
 
     open fun WebActionContext.readParamArray(name: String): JSONArray? = params.getJSONArray(name)
 
-    open fun WebActionContext.readBody(type: Class<*>): Any? = params.toJavaObject(type)
+    open fun WebActionContext.readBody(type: Class<*>): Any? = JSON.parseObject(params.toJSONString(), type)
     open fun WebActionContext.readBodyArray(): JSONArray? = req.bodyArray
 
 
@@ -62,6 +63,7 @@ open class WebMethodInvoker(
                             else files[0]
                         }
                     }
+
                     Exception::class.java -> valueGetter { this.runtimeError }
 
                     else -> {

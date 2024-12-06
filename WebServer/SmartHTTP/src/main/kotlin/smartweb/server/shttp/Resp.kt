@@ -43,7 +43,7 @@ class Resp(val response: HttpResponse) : smartweb.http.Response {
         cookies.forEach { response.addHeader("Set-Cookie", it.toCookieString()) }
 
         response.setHttpStatus(this.status, "")
-        if (this.contentLength > 0) response.contentLength = this.contentLength.toInt()
+        if (this.contentLength >= 0) response.contentLength = this.contentLength.toInt()
     }
 
     override fun write(result: ByteArray) {
