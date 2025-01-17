@@ -32,7 +32,7 @@ open class WebMethodInvoker(
 
     open fun WebActionContext.readParamArray(name: String): JSONArray? = params.getJSONArray(name)
 
-    open fun WebActionContext.readBody(type: Class<*>): Any? = JSON.parseObject(params.toJSONString(), type)
+    open fun WebActionContext.readBody(type: Class<*>): Any? = params.toJavaObject(type)
     open fun WebActionContext.readBodyArray(): JSONArray? = req.bodyArray
 
 
