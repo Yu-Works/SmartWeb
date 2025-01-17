@@ -26,14 +26,16 @@ abstract class InternalWebServer(
 
     open val enableMethod: Array<String> = arrayOf("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD")
 
-    val port: Int = config.port
-    val isDevMode: Boolean = config.isDevMode
-    val rootRouter: WebRootRouter = config.rootRouter
-    val sessionCache: EhcacheHelp<Session> = config.sessionCache
-    val cors: Boolean
-    val corsDomain: Array<String>
+    open val port: Int = config.port
+    open val isDevMode: Boolean = config.isDevMode
+    open val rootRouter: WebRootRouter = config.rootRouter
+    open val sessionCache: EhcacheHelp<Session> = config.sessionCache
+    open val cors: Boolean = config.cors != null
+    open val corsDomain: Array<String> =
+        if (cors) config.cors!!.split(",").map { it.trim() }.toTypedArray()
+        else arrayOf()
 
-    val provider: WebUserProvider? = config.userProvider
+    open val provider: WebUserProvider? = config.userProvider
 
     val tmpLocation = File(config.upload.tempDir + "/SmartWeb/${UUID.randomUUID()}")
         .apply { if (!exists()) mkdirs() }
@@ -55,18 +57,13 @@ abstract class InternalWebServer(
 
     abstract val pool: CoroutineScope
 
-    init {
-        cors = config.cors != null
-        corsDomain =
-            if (cors) config.cors!!.split(",").map { it.trim() }.toTypedArray()
-            else arrayOf()
-    }
-
     abstract fun start()
     abstract fun stop()
 
     open fun findSession(id: String?, resp: Response): Session {
-        val sid = id ?: UUID.randomUUID().toString().also { resp.addCookie(Cookie(sessionCookieName, it, true)) }
+        val sid = id ?: UUID.randomUUID()
+            .toString()
+            .also { resp.addCookie(Cookie(sessionCookieName, it, true, path = "/")) }
         return sessionCache.getOrPut(sid) { Session(sid, HashMap()) }
     }
 
@@ -152,8 +149,13 @@ abstract class InternalWebServer(
         buildResult(result)
     }
 
-    open fun WebActionContext.buildResult(obj: Any?) {
-        if (obj is Render) return obj.doRender(this, this@InternalWebServer)
+    open fun WebActionContext.buildResult(result: Any?) {
+        // 执行逻辑，先判断 result 是否是 Render 如果是 Render 则调用其 invoke 方法。
+        // 如果方法没有返回值，则认定 Render 操作完毕，否则，则认为 Render 返回结果需要继续按逻辑处理。
+        if (result is Render) {
+            result(this, this@InternalWebServer)?.let { buildResult(it) }
+            return
+        }
         invoker?.temple?.let {
             if (req.accept.mediaType[0] == "text/html") {
                 resultByString(it.invoke(this), "text/html")
@@ -163,39 +165,41 @@ abstract class InternalWebServer(
 
         fun statusCode(code: Int) {
             resp.status = code
+            resp.contentLength = 0
+            resp.write()
         }
-        if (obj == null && requestMethod == smartweb.http.HttpMethod.POST) return statusCode(201)
-        if (obj == null) return statusCode(204)
+        if (result == null && requestMethod == HttpMethod.POST) return statusCode(201)
+        if (result == null) return statusCode(204)
 
-        when (obj) {
-            is String -> makeStringHeader(obj).let { resultByString(it.first, it.second) }
-            is Byte -> resultByByteArray(byteArrayOf(obj))
-            is ByteArray -> resultByByteArray(obj)
-            is InputStream -> resultByInputStream(obj)
+        when (result) {
+            is String -> makeStringHeader(result).let { resultByString(it.first, it.second) }
+            is Byte -> resultByByteArray(byteArrayOf(result))
+            is ByteArray -> resultByByteArray(result)
+            is InputStream -> resultByInputStream(result)
             is UploadFile -> {
-                val suffix = obj.name.let { it.substring(it.lastIndexOf(".") + 1) }
+                val suffix = result.name.let { it.substring(it.lastIndexOf(".") + 1) }
                 val contentType = defaultFileContentType[suffix] ?: run {
-                    resp.addHeader("Content-Disposition", "filename=\"${obj.name}\"")
+                    resp.addHeader("Content-Disposition", "filename=\"${result.name}\"")
                     "application/octet-stream"
                 }
-                resultByInputStream(obj.inputStream, contentType, obj.size)
+                resultByInputStream(result.inputStream, contentType, result.size)
             }
 
             is File -> {
-                val suffix = obj.name.let { it.substring(it.lastIndexOf(".") + 1) }
+                val suffix = result.name.let { it.substring(it.lastIndexOf(".") + 1) }
                 val contentType = defaultFileContentType[suffix] ?: run {
-                    resp.addHeader("Content-Disposition", "filename=\"${obj.name}\"")
+                    resp.addHeader("Content-Disposition", "filename=\"${result.name}\"")
                     "application/octet-stream"
                 }
-                resultByInputStream(FileInputStream(obj), contentType, obj.length())
+                resultByInputStream(FileInputStream(result), contentType, result.length())
             }
 
             is DownloadFile -> {
-                resp.addHeader("Content-Disposition", "filename=\"${obj.name}\"")
-                resultByInputStream(obj.input, obj.contentType, obj.length)
+                resp.addHeader("Content-Disposition", "filename=\"${result.name}\"")
+                resultByInputStream(result.input, result.contentType, result.length)
             }
 
-            else -> resultByString(JSON.toJSONString(obj), "application/json")
+            else -> resultByString(JSON.toJSONString(result), "application/json")
         }
     }
 

@@ -2,8 +2,8 @@ plugins {
     java
     kotlin("jvm") version "2.0.10"
 }
-val coreVersion = "1.0.0-DEV1"
-version = "1.0.0-DEV1"
+val coreVersion = "1.0.0-DEV2"
+version = "1.0.0-DEV2"
 
 
 allprojects {
@@ -95,5 +95,5 @@ allprojects {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    api("org.ehcache:ehcache:3.10.1")
+    api("org.ehcache:ehcache:3.10.8")
 }

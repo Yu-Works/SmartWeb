@@ -54,7 +54,7 @@ class SmartHTTPServer(config: WebServerConfig) : InternalWebServer(config) {
             override fun handle(request: HttpRequest, response: HttpResponse, future: CompletableFuture<Any>) {
                 val req = Req(request)
                 val resp = Resp(response)
-                if (req.method != "get" && req.method != "head") {
+                if (req.method != "GET" && req.method != "HEAD") {
 
                     if (req.contentType.contains("multipart/form-data")) {
 
