@@ -30,7 +30,7 @@ class Req(internal val exc: HttpServerExchange) : Request {
                         else null
                     }
             } ?: "UTF-8"
-    override val queryString: String
+    override val queryString: String?
         get() = exc.queryString
 
     override lateinit var parameters: Map<String, Array<String>>

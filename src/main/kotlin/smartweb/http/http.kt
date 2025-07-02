@@ -31,7 +31,7 @@ interface Request {
 
     val contentType: String
     val charset: String
-    val queryString: String
+    val queryString: String?
 
     val accept: smartweb.http.Accept
 

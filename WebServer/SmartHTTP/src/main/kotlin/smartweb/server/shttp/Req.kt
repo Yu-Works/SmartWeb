@@ -25,7 +25,7 @@ class Req(private val request: HttpRequest) : smartweb.http.Request {
         get() = (request.contentType ?: "").split(";")[0].trim()
     override val charset: String
         get() = request.characterEncoding
-    override val queryString: String
+    override val queryString: String?
         get() = request.queryString
 
     override val parameters: Map<String, Array<String>>
