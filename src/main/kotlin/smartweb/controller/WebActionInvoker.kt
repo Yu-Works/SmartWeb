@@ -1,22 +1,18 @@
 package smartweb.controller
 
-import smartweb.http.HttpMethod
-import smartweb.temple.Temple
 import rain.controller.ProcessInvoker
-import rain.controller.dss.DssActionInvoker
-import rain.controller.dss.router.RouterMatcher
+import rain.controller.simple.SimpleActionInvoker
+import smartweb.temple.Temple
 
 class WebActionInvoker(
     val allowMethods: List<smartweb.http.HttpMethod>,
     val temple: Temple?,
-    level: Int,
-    matchers: List<RouterMatcher<WebActionContext>>,
     action: ProcessInvoker<WebActionContext>,
     beforeProcesses: Array<ProcessInvoker<WebActionContext>>,
     aftersProcesses: Array<ProcessInvoker<WebActionContext>>,
     catchsProcesses: Array<ProcessInvoker<WebActionContext>>
-) : DssActionInvoker<WebActionContext>(level, matchers, action, beforeProcesses, aftersProcesses, catchsProcesses) {
+) : SimpleActionInvoker<WebActionContext>(action, beforeProcesses, aftersProcesses, catchsProcesses) {
 
-    override suspend fun checkChannel(context: WebActionContext) = context.requestMethod in allowMethods
+    override suspend fun checkChannel(context: WebActionContext) = context.requestMethodEnum in allowMethods
 
 }

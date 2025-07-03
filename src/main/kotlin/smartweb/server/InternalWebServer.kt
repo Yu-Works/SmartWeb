@@ -88,11 +88,8 @@ abstract class InternalWebServer(
             return
         }
 
-        val methodEnum = HttpMethod.valueOf(method)
-
         val path = req.path
-        val p = path.substring(1, path.length).split("/")
-        val context = WebActionContext(methodEnum, p.toTypedArray(), req, resp)
+        val context = WebActionContext(req, resp)
 
         req.parameters.forEach { (k, v) ->
             context.params[k] =
@@ -168,7 +165,7 @@ abstract class InternalWebServer(
             resp.write()
         }
         if (result == null && resp.status == 200){
-            if (requestMethod == HttpMethod.POST) return statusCode(201)
+            if (requestMethodEnum == HttpMethod.POST) return statusCode(201)
             return statusCode(204)
         }
 

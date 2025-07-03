@@ -4,6 +4,6 @@ import rain.controller.RootRouter
 import rain.controller.RootRouterProcessFlowInfo
 import rain.controller.dss.router.DssRouter
 
-typealias WebRouter = DssRouter<WebActionContext>
+typealias WebRouter = DssRouter<WebActionContext, ActionRequestMethodMapping>
 typealias WebRootRouter = RootRouter<WebActionContext, WebRouter>
-typealias WebRootInfo = RootRouterProcessFlowInfo<WebActionContext, DssRouter<WebActionContext>>
+typealias WebRootInfo = RootRouterProcessFlowInfo<WebActionContext, DssRouter<WebActionContext, ActionRequestMethodMapping>>

@@ -1,6 +1,10 @@
 package com.IceCreamQAQ.test.web
 
+import rain.controller.annotation.Path
+import smartweb.annotation.DeleteAction
+import smartweb.annotation.GetAction
 import smartweb.annotation.PostAction
+import smartweb.annotation.PutAction
 import smartweb.annotation.WebAction
 import smartweb.annotation.WebController
 import smartweb.http.UploadFile
@@ -105,6 +109,24 @@ class TestController {
 //
 //    @Action("headCommit")
 //    fun headCommit(headCommit: String) = headCommit
+}
+
+@WebController
+@Path("author/{authorId}")
+class TestController2 {
+
+    @GetAction
+    fun getAuthor(authorId: Int) = "GET 作者ID: $authorId"
+
+    @PostAction
+    fun postAuthor(authorId: Int) = "POST 作者ID: $authorId"
+
+    @PutAction
+    fun putAuthor(authorId: Int) = "PUT 作者ID: $authorId"
+
+    @DeleteAction
+    fun deleteAuthor(authorId: Int) = "DELETE 作者ID: $authorId"
+
 }
 
 //@WebController

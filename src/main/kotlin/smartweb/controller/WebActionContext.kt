@@ -8,11 +8,14 @@ import rain.api.permission.IUser
 import rain.controller.dss.PathActionContext
 
 class WebActionContext(
-    val requestMethod: HttpMethod,
-    path: Array<String>,
     val req: Request,
     val resp: Response
-) : PathActionContext(path) {
+) : PathActionContext() {
+
+    override val path: Array<String> = req.path.substring(1).split('/').toTypedArray()
+
+    internal val requestMethodEnum: HttpMethod? = runCatching { HttpMethod.valueOf(req.method) }.getOrNull()
+    internal val requestMethodString: String = requestMethodEnum?.name ?: req.method
 
     companion object {
         internal fun WebActionContext.setUser(user: IUser) {
