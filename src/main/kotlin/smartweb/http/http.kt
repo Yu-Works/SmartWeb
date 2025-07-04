@@ -31,7 +31,7 @@ interface Request {
 
     val contentType: String
     val charset: String
-    val queryString: String
+    val queryString: String?
 
     val accept: smartweb.http.Accept
 
@@ -132,7 +132,8 @@ class Cookie(
         csb.append("=").append(value)
 
         if (domain != null) csb.append("; Domain=").append(domain)
-        if (path != null) csb.append("; Path=").append(path)
+        if (path == null) path = "/"
+        csb.append("; Path=").append(path)
         if (expires != null) csb.append("; Expires=").append(expires)
         if (maxAge != null) csb.append("; Max-Age=").append(maxAge.toString())
         if (httpOnly) csb.append("; HttpOnly")

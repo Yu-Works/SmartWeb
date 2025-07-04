@@ -2,8 +2,8 @@ plugins {
     java
     kotlin("jvm") version "2.0.10"
 }
-val coreVersion = "1.0.0-DEV2"
-version = "1.0.0-DEV3"
+val coreVersion = "1.0.0-DEV4"
+version = "1.0.0-DEV4"
 
 
 allprojects {
