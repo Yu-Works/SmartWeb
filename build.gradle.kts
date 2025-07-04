@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     java
     kotlin("jvm") version "2.0.10"
@@ -17,7 +19,7 @@ allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-        maven("https://maven.icecreamqaq.com/repository/maven-public/")
+        maven("https://maven.cnb.cool/IceCream/maven/-/packages/")
     }
 
     pluginManager.apply(JavaLibraryPlugin::class.java)
@@ -33,8 +35,11 @@ allprojects {
     }
 
     kotlin {
-        jvmToolchain(8)
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_1_8)
+        }
     }
+
     configure<PublishingExtension> {
         publications {
             create<MavenPublication>(name) {
@@ -70,8 +75,8 @@ allprojects {
         repositories {
             mavenLocal()
             maven {
-                val snapshotsRepoUrl = "https://maven.icecreamqaq.com/repository/maven-snapshots/"
-                val releasesRepoUrl = "https://maven.icecreamqaq.com/repository/maven-releases/"
+                val snapshotsRepoUrl = "https://maven.cnb.cool/IceCream/maven/-/packages/"
+                val releasesRepoUrl = "https://maven.cnb.cool/IceCream/maven/-/packages/"
                 url = uri(if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
 
 
