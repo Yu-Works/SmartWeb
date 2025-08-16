@@ -170,6 +170,7 @@ abstract class InternalWebServer(
         }
 
         when (result) {
+            is Render -> resp.write()
             is String -> makeStringHeader(result).let { resultByString(it.first, it.second) }
             is Byte -> resultByByteArray(byteArrayOf(result))
             is ByteArray -> resultByByteArray(result)
