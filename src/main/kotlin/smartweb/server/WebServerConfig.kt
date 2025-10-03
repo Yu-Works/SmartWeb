@@ -11,5 +11,6 @@ data class WebServerConfig(
     val upload: WebServerUploadConfig,
     val rootRouter: WebRootRouter,
     val sessionCache: EhcacheHelp<Session>,
+    val allowMethod: List<String>,
     val userProvider: WebUserProvider?
 )

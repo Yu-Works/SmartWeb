@@ -24,7 +24,7 @@ abstract class InternalWebServer(
         const val sessionCookieName = "SmartWebSID"
     }
 
-    open val enableMethod: Array<String> = arrayOf("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD")
+    open val enableMethod: Array<String> = config.allowMethod.toTypedArray()
 
     open val port: Int = config.port
     open val isDevMode: Boolean = config.isDevMode
@@ -78,7 +78,7 @@ abstract class InternalWebServer(
 
             resp.addHeader("Access-Control-Allow-Origin", origin)
             resp.addHeader("Access-Control-Allow-Headers", "*")
-            resp.addHeader("Access-Control-Allow-Method", "GET,POST,OPTIONS,PUT,DELETE")
+            resp.addHeader("Access-Control-Allow-Method", enableMethod.joinToString(","))
             if (method == "options") return
         }
 
@@ -164,7 +164,7 @@ abstract class InternalWebServer(
             resp.contentLength = 0
             resp.write()
         }
-        if (result == null && resp.status == 200){
+        if (result == null && resp.status == 200) {
             if (requestMethodEnum == HttpMethod.POST) return statusCode(201)
             return statusCode(204)
         }

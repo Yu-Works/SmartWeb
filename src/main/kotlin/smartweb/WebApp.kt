@@ -10,6 +10,7 @@ import rain.api.di.DiContext.Companion.get
 import rain.api.loader.ApplicationService
 import rain.di.Config
 import rain.di.config.ConfigManager
+import rain.di.config.ConfigManager.Companion.getArray
 import rain.di.config.ConfigManager.Companion.getConfig
 import rain.event.EventBusImpl
 import rain.function.annotation
@@ -36,6 +37,7 @@ class WebApp(
 ) : ApplicationService {
 
     val server = HashMap<String, InternalWebServer>()
+    val defaultAllowMethod = listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD")
 
     val isDevMode: Boolean
 
@@ -88,6 +90,7 @@ class WebApp(
                         configManager.getConfig<WebServerUploadConfig>("$configName.upload") ?: WebServerUploadConfig(),
                         rootRouter,
                         EhcacheHelp(cm!!.getCache(serverName, String::class.java, Any::class.java)),
+                        configManager.getArray<String>("$configName.allowMethod") ?: defaultAllowMethod,
                         userProvider
                     )
                     val impl = configManager.getConfig<String>("$configName.impl") ?: defaultImpl
