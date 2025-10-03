@@ -16,6 +16,7 @@ enum class HttpMethod(val method: String) {
     POST("POST"),
     PUT("PUT"),
     DELETE("DELETE"),
+    PATCH("PATCH"),
     OPTIONS("OPTIONS"),
     HEAD("HEAD"),
     WebSocket("WebSocket")

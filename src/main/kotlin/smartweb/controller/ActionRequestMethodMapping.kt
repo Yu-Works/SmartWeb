@@ -9,6 +9,7 @@ class ActionRequestMethodMapping : ActionInvoker<WebActionContext> {
     var postAction: WebActionInvoker? = null
     var putAction: WebActionInvoker? = null
     var deleteAction: WebActionInvoker? = null
+    var patchAction: WebActionInvoker? = null
 
     val actionMap: MutableMap<String, WebActionInvoker>
         get() {
@@ -24,6 +25,7 @@ class ActionRequestMethodMapping : ActionInvoker<WebActionContext> {
                 HttpMethod.POST -> postAction
                 HttpMethod.PUT -> putAction
                 HttpMethod.DELETE -> deleteAction
+                HttpMethod.PATCH -> patchAction
                 else -> null
             } ?: _actionMap?.get(context.requestMethodString)
         }?.invoke(context) ?: false

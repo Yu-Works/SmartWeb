@@ -88,6 +88,7 @@ class WebControllerLoader(
                 HttpMethod.POST -> mapping.postAction = actionInvoker
                 HttpMethod.PUT -> mapping.putAction = actionInvoker
                 HttpMethod.DELETE -> mapping.deleteAction = actionInvoker
+                HttpMethod.PATCH -> mapping.patchAction = actionInvoker
                 else -> mapping.actionMap[method] = actionInvoker
             }
         }
