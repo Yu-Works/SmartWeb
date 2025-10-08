@@ -103,7 +103,8 @@ class WebControllerLoader(
         afterProcesses: Array<ProcessInvoker<WebActionContext>>,
         catchProcesses: Array<ProcessInvoker<WebActionContext>>
     ) = WebActionInvoker(
-        channels.map { HttpMethod.valueOf(it) },
+        actionClass,
+        actionMethod,
         "${actionClass.name.replace(".", "/")}/${actionMethod.name}.html".let { templePath ->
             templeEngines.forEachFirstOrNull { it.getTemple(templePath) }
         },

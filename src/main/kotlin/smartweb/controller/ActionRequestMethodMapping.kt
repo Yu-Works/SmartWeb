@@ -2,6 +2,7 @@ package smartweb.controller
 
 import rain.controller.ActionInvoker
 import smartweb.http.HttpMethod
+import java.lang.reflect.Method
 
 class ActionRequestMethodMapping : ActionInvoker<WebActionContext> {
 
@@ -17,6 +18,11 @@ class ActionRequestMethodMapping : ActionInvoker<WebActionContext> {
             return _actionMap!!
         }
    private var _actionMap: MutableMap<String, WebActionInvoker>? = null
+
+    override val actionClass: Class<*>?
+        get() = null
+    override val actionMethod: Method?
+        get() = null
 
     override suspend fun invoke(context: WebActionContext): Boolean =
         run {

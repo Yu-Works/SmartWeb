@@ -90,7 +90,8 @@ class WebApp(
                         configManager.getConfig<WebServerUploadConfig>("$configName.upload") ?: WebServerUploadConfig(),
                         rootRouter,
                         EhcacheHelp(cm!!.getCache(serverName, String::class.java, Any::class.java)),
-                        configManager.getArray<String>("$configName.allowMethod") ?: defaultAllowMethod,
+                        configManager.getArray<String>("$configName.allowMethod").takeIf { it.isNotEmpty() }
+                            ?: defaultAllowMethod,
                         userProvider
                     )
                     val impl = configManager.getConfig<String>("$configName.impl") ?: defaultImpl
@@ -100,14 +101,13 @@ class WebApp(
 
                     rootRouter.actions
                         .forEach {
-                            it.actionMethod.annotation<NewWs> {
+                            it.actionMethod?.annotation<NewWs> {
                                 serverImpl.createWsAction(
                                     value,
-                                    it.actionMethod.run {
-                                        invoke(context[declaringClass])
-                                    }.let { r ->
-                                        if (r is KWsActionCreator) r.build(serverImpl) else r as WsAction
-                                    }
+                                    it.actionMethod?.invoke(context[it.actionClass!!])
+                                        .let { r ->
+                                            if (r is KWsActionCreator) r.build(serverImpl) else r as WsAction
+                                        }
                                 )
                             }
                         }
