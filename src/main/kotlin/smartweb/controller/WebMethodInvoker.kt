@@ -1,7 +1,5 @@
 package smartweb.controller
 
-import com.alibaba.fastjson2.JSON
-import smartweb.annotation.*
 import com.alibaba.fastjson2.JSONArray
 import rain.api.permission.IUser
 import rain.controller.ActionContext
@@ -9,8 +7,17 @@ import rain.controller.ControllerInstanceGetter
 import rain.controller.simple.SimpleKJReflectMethodInvoker
 import rain.controller.simple.SimpleKJReflectMethodInvoker.MethodParam.Companion.annotation
 import rain.controller.simple.SimpleKJReflectMethodInvoker.MethodParam.Companion.hasAnnotation
-import rain.function.toLowerCaseFirstOne
-import smartweb.http.*
+import rain.function.allField
+import smartweb.annotation.ContextValue
+import smartweb.annotation.CookieValue
+import smartweb.annotation.RequestBody
+import smartweb.annotation.RequestParam
+import smartweb.annotation.SessionValue
+import smartweb.http.Cookie
+import smartweb.http.Request
+import smartweb.http.Response
+import smartweb.http.Session
+import smartweb.http.UploadFile
 import java.lang.reflect.Method
 
 open class WebMethodInvoker(
@@ -19,9 +26,11 @@ open class WebMethodInvoker(
     private val contextValueKeys: List<String>
 ) : SimpleKJReflectMethodInvoker<WebActionContext, WebActionContext.() -> Any?>(method, instance) {
 
-    companion object {
-        val requestBodyParamName = arrayOf("request", "requestBody", "body")
-    }
+//    companion object {
+//        val requestBodyParamName = arrayOf("request", "requestBody", "body", "req", "data")
+//        val requestBodyListParamName =
+//            arrayOf("request", "requestBody", "body", "req", "data", "list", "datas", "dataList")
+//    }
 
     open fun WebActionContext.readParam(name: String, type: Class<*>): Any? =
         saves[name]?.let {
@@ -35,21 +44,21 @@ open class WebMethodInvoker(
     open fun WebActionContext.readBody(type: Class<*>): Any? = params.toJavaObject(type)
     open fun WebActionContext.readBodyArray(): JSONArray? = req.bodyArray
 
+    class ValueGetterException : Exception(null, null, false, false)
 
     override fun initParam(method: Method, params: Array<MethodParam<WebActionContext.() -> Any?>>) {
 
         params.forEach {
-
             fun valueGetter(body: WebActionContext.() -> Any?) {
                 it.attachment = body
-                throw RuntimeException()
+                throw ValueGetterException()
             }
 
-            if (it.relType.realClass == List::class.java && it.relType.generics!![0].realClass == smartweb.http.UploadFile::class.java) {
-                valueGetter { req.uploadFiles?.get(it.name) }
-            }
+            runCatching {
+                if (it.relType.realClass == List::class.java && it.relType.generics!![0].realClass == UploadFile::class.java) {
+                    valueGetter { req.uploadFiles?.get(it.name) }
+                }
 
-            kotlin.runCatching {
                 when (it.type) {
                     ActionContext::class.java, WebActionContext::class.java -> valueGetter { this }
                     Request::class.java -> valueGetter { req }
@@ -110,48 +119,76 @@ open class WebMethodInvoker(
 
                         if (IUser::class.java.isAssignableFrom(it.type))
                             valueGetter { this.user }
-
-
-                        val isSimple = it.relType.realClass.isSimpleClass()
-
-                        val isBody =
-                            !isSimple && !it.hasAnnotation<RequestParam>() && (it.hasAnnotation<RequestBody>() || it.name in requestBodyParamName || it.name == it.type.simpleName.toLowerCaseFirstOne() || method.parameters.size == 1)
-
-
-                        val isArray = it.type.isArray
-                        val isList = isArray || List::class.java.isAssignableFrom(it.type)
-
-                        val type =
-                            if (isArray) it.type.componentType
-                            else if (isList) it.relType.generics!![0].realClass
-                            else it.type
-
-                        val reader: WebActionContext.() -> Any? =
-                            if (isBody) {
-                                if (isList) {
-                                    { readBodyArray()?.toList(type) }
-                                } else {
-                                    { readBody(type) }
-                                }
-                            } else {
-                                if (isList) {
-                                    if (isArray) {
-                                        { readParamArray(it.name)?.toArray(type) }
-                                    } else {
-                                        { readParamArray(it.name)?.toList(type) }
-                                    }
-                                } else {
-                                    { readParam(it.name, type) }
-                                }
-                            }
-                        it.attachment = reader
                     }
                 }
             }.onFailure { err ->
-                if (err is RuntimeException) return@forEach
+                if (err is ValueGetterException) return@forEach
                 throw err
             }
         }
+
+        val lessParams = params.filter { it.attachment == null }
+        val lessParamsNum = lessParams.size
+
+        params.filter { it.attachment == null }
+            .forEach {
+                val isSimple = it.relType.realClass.isSimpleClass()
+
+                val isParam = isSimple || it.hasAnnotation<RequestParam>()
+
+                val isBody =
+                    it.hasAnnotation<RequestBody>() || (!isSimple && !it.hasAnnotation<RequestParam>() && !isParam && lessParamsNum == 1)
+
+
+                val isArray = it.type.isArray
+                val isList = isArray || List::class.java.isAssignableFrom(it.type)
+
+                val type =
+                    if (isArray) it.type.componentType
+                    else if (isList) it.relType.generics!![0].realClass
+                    else it.type
+
+                fun readParamFun(): WebActionContext.() -> Any? {
+                    return if (isList) {
+                        if (isArray) {
+                            { readParamArray(it.name)?.toArray(type) }
+                        } else {
+                            { readParamArray(it.name)?.toList(type) }
+                        }
+                    } else {
+                        { readParam(it.name, type) }
+                    }
+                }
+
+                fun readBodyFun(): WebActionContext.() -> Any? {
+                    return if (isList) {
+                        if (isArray) {
+                            { readBodyArray()?.toArray(type) }
+                        } else {
+                            { readBodyArray()?.toList(type) }
+                        }
+                    } else {
+                        val fields = it.type.allField.map { field -> field.name }.toSet().toList()
+                        return {
+                            if (fields.any { field -> this.params.containsKey(field) }) readBody(type)
+                            else null
+                        }
+                    }
+                }
+
+                fun readFun(): WebActionContext.() -> Any? {
+                    if (isParam) return readParamFun()
+                    if (isBody) return readBodyFun()
+                    val fields = it.type.allField.map { field -> field.name }.toSet().toList()
+                    return {
+                        if (this.params.containsKey(it.name)) readParam(it.name, type)
+                        else if (fields.any { field -> this.params.containsKey(field) }) readBody(type)
+                        else null
+                    }
+                }
+
+                it.attachment = readFun()
+            }
     }
 
     open fun Class<*>.isSimpleClass(): Boolean {
