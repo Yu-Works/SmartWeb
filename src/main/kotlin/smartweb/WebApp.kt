@@ -101,10 +101,10 @@ class WebApp(
 
                     rootRouter.actions
                         .forEach {
-                            it.actionMethod?.annotation<NewWs> {
+                            it.actionMethod.annotation<NewWs> {
                                 serverImpl.createWsAction(
                                     value,
-                                    it.actionMethod?.invoke(context[it.actionClass!!])
+                                    it.actionMethod.invoke(context[it.actionClass])
                                         .let { r ->
                                             if (r is KWsActionCreator) r.build(serverImpl) else r as WsAction
                                         }
