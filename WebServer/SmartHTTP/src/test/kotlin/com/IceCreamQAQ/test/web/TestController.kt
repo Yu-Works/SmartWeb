@@ -44,7 +44,7 @@ class TestController {
 //        }
 //    }
 
-    @WebAction("tpv/{pv}")
+    @GetAction("tpv/{pv}")
     fun testPathVar(pv: Int?) = pv ?: -1
 
     @WebAction("2entity")
