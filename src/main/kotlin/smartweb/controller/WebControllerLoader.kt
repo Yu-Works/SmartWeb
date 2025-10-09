@@ -17,6 +17,8 @@ import rain.controller.simple.SimpleCatchMethodInvoker
 import rain.di.Config
 import rain.function.annotation
 import rain.function.nameWithParamsFullClass
+import smartweb.controller.router.WebDynamicRouter
+import smartweb.controller.router.WebStaticRouter
 import java.lang.reflect.Method
 
 class WebControllerLoader(
@@ -29,25 +31,25 @@ class WebControllerLoader(
     val rootRouterMap = HashMap<String, WebRootRouter>()
 
     override fun findRootRouter(name: String): WebRootInfo =
-        rootInfoMap.getOrPut(name) { WebRootInfo(WebRouter(0)) }
+        rootInfoMap.getOrPut(name) { WebRootInfo(WebStaticRouter(0)) }
 
     override fun getSubStaticRouter(
         router: WebRouter,
         subPath: String
     ): WebRouter =
         router.static.getOrPut(subPath) {
-            DssRouter(router.level + 1)
+            WebStaticRouter(router.level + 1, router.pathVars)
         }
 
     override fun getSubDynamicRouter(
         router: WebRouter,
-        matcher: RouterMatcher<WebActionContext>
-    ): WebRouter =
-        let {
-            router.dynamic.firstOrNull { it.matcher == matcher }
-                ?: DynamicRouter(matcher, WebRouter(router.level + 1))
-                    .apply { router.dynamic.add(this) }
-        }.router
+        matcher: RouterMatcher<WebActionContext>,
+        names: List<String>
+    ) = let {
+        router.dynamic.firstOrNull { it.matcher == matcher }
+            ?: WebDynamicRouter(matcher, WebStaticRouter(router.level + 1, pathVars = router.pathVars + names))
+                .apply { router.dynamic.add(this) }
+    }.router
 
     override fun controllerChannel(annotation: Annotation?, controllerClass: Class<*>): List<String> =
         arrayListOf("GET", "POST", "PUT", "DELETE")
@@ -63,7 +65,7 @@ class WebControllerLoader(
                 val ac = an::class.java
                 val f = try {
                     ac.getMethod("value")
-                }catch (e: NoSuchMethodException) {
+                } catch (e: NoSuchMethodException) {
                     error("Action ${actionMethod.nameWithParamsFullClass} 加载时遇到问题，提供的注解 ${anClass.name} 没有提供对应的 value 属性。")
                 }
                 val path = f.invoke(an)
@@ -99,6 +101,7 @@ class WebControllerLoader(
         actionClass: Class<*>,
         actionMethod: Method,
         instanceGetter: ControllerInstanceGetter,
+        actionRouter: WebRouter,
         beforeProcesses: Array<ProcessInvoker<WebActionContext>>,
         afterProcesses: Array<ProcessInvoker<WebActionContext>>,
         catchProcesses: Array<ProcessInvoker<WebActionContext>>
@@ -108,7 +111,7 @@ class WebControllerLoader(
         "${actionClass.name.replace(".", "/")}/${actionMethod.name}.html".let { templePath ->
             templeEngines.forEachFirstOrNull { it.getTemple(templePath) }
         },
-        WebMethodInvoker(actionMethod, instanceGetter, contextValueKeys).init(),
+        WebMethodInvoker(actionMethod, instanceGetter, contextValueKeys, actionRouter.pathVars).init(),
         beforeProcesses,
         afterProcesses,
         catchProcesses

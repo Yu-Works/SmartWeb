@@ -29,6 +29,7 @@ annotation class GetPostAction(val value: String = "")
 
 annotation class RequestBody
 annotation class RequestParam
+annotation class PathVar
 
 annotation class SessionValue
 annotation class CookieValue

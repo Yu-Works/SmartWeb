@@ -10,6 +10,7 @@ import rain.controller.simple.SimpleKJReflectMethodInvoker.MethodParam.Companion
 import rain.function.allField
 import smartweb.annotation.ContextValue
 import smartweb.annotation.CookieValue
+import smartweb.annotation.PathVar
 import smartweb.annotation.RequestBody
 import smartweb.annotation.RequestParam
 import smartweb.annotation.SessionValue
@@ -23,14 +24,20 @@ import java.lang.reflect.Method
 open class WebMethodInvoker(
     method: Method,
     instance: ControllerInstanceGetter,
-    private val contextValueKeys: List<String>
+    private val contextValueKeys: List<String>,
+    val pathVars: Array<String> = emptyArray()
 ) : SimpleKJReflectMethodInvoker<WebActionContext, WebActionContext.() -> Any?>(method, instance) {
 
-//    companion object {
+    //    companion object {
 //        val requestBodyParamName = arrayOf("request", "requestBody", "body", "req", "data")
 //        val requestBodyListParamName =
 //            arrayOf("request", "requestBody", "body", "req", "data", "list", "datas", "dataList")
 //    }
+    open fun WebActionContext.readSave(name: String, type: Class<*>): Any? = saves[name]?.let {
+        if (type.isInstance(it)) return it
+        if (it is String) it.stringAsSimple(type)
+        else null
+    }
 
     open fun WebActionContext.readParam(name: String, type: Class<*>): Any? =
         saves[name]?.let {
@@ -58,6 +65,9 @@ open class WebMethodInvoker(
                 if (it.relType.realClass == List::class.java && it.relType.generics!![0].realClass == UploadFile::class.java) {
                     valueGetter { req.uploadFiles?.get(it.name) }
                 }
+
+                if (it.name in pathVars || it.hasAnnotation<PathVar>())
+                    valueGetter { readSave(it.name, it.type) }
 
                 when (it.type) {
                     ActionContext::class.java, WebActionContext::class.java -> valueGetter { this }
