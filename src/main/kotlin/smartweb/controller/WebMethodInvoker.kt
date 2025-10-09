@@ -191,9 +191,11 @@ open class WebMethodInvoker(
                     if (isBody) return readBodyFun()
                     val fields = it.type.allField.map { field -> field.name }.toSet().toList()
                     return {
-                        if (this.params.containsKey(it.name)) readParam(it.name, type)
-                        else if (fields.any { field -> this.params.containsKey(field) }) readBody(type)
-                        else null
+//                        if (this.saves.containsKey(it.name) || this.params.containsKey(it.name))
+
+                        readParam(it.name, type)
+                            ?: if (fields.any { field -> this.params.containsKey(field) }) readBody(type)
+                            else null
                     }
                 }
 
