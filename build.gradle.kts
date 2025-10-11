@@ -5,7 +5,7 @@ plugins {
     kotlin("jvm") version "2.0.10"
 }
 val coreVersion = "1.0.0-DEV5"
-version = "1.0.0-DEV5"
+version = "1.0.0-DEV6"
 
 
 allprojects {
