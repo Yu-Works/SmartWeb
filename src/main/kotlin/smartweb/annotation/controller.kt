@@ -24,6 +24,8 @@ annotation class PostAction(val value: String = "")
 annotation class PutAction(val value: String = "")
 @RequestMethods("DELETE")
 annotation class DeleteAction(val value: String = "")
+@RequestMethods("PATCH")
+annotation class PatchAction(val value: String = "")
 @RequestMethods("GET", "POST")
 annotation class GetPostAction(val value: String = "")
 
