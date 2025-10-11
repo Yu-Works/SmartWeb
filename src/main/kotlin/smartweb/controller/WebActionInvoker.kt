@@ -11,15 +11,15 @@ class WebActionInvoker(
     val temple: Temple?,
     action: ProcessInvoker<WebActionContext>,
     beforeProcesses: Array<ProcessInvoker<WebActionContext>>,
-    aftersProcesses: Array<ProcessInvoker<WebActionContext>>,
-    catchsProcesses: Array<ProcessInvoker<WebActionContext>>
+    afterProcesses: Array<ProcessInvoker<WebActionContext>>,
+    catchProcesses: Array<ProcessInvoker<WebActionContext>>
 ) : SimpleActionInvoker<WebActionContext>(
     actionClass,
     actionMethod,
     action,
     beforeProcesses,
-    aftersProcesses,
-    catchsProcesses
+    afterProcesses,
+    catchProcesses
 ) {
 
     override suspend fun checkChannel(context: WebActionContext) = true
