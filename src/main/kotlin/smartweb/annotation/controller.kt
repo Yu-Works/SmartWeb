@@ -34,3 +34,5 @@ annotation class PathVar
 annotation class SessionValue
 annotation class CookieValue
 annotation class ContextValue
+
+annotation class ContextValues(vararg val value: String)

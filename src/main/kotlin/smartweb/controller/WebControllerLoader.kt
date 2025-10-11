@@ -1,37 +1,50 @@
 package smartweb.controller
 
-import smartweb.annotation.*
-import smartweb.forEachFirstOrNull
-import smartweb.http.HttpMethod
-import smartweb.temple.TempleEngine
 import rain.api.di.DiContext
-import rain.controller.ActionInfo
 import rain.controller.ControllerInstanceGetter
 import rain.controller.ProcessInvoker
-import rain.controller.RootRouter
 import rain.controller.dss.DssControllerLoader
-import rain.controller.dss.router.DssRouter
-import rain.controller.dss.router.DynamicRouter
 import rain.controller.dss.router.RouterMatcher
-import rain.controller.simple.SimpleCatchMethodInvoker
 import rain.di.Config
 import rain.function.annotation
 import rain.function.nameWithParamsFullClass
+import smartweb.annotation.ContextValues
+import smartweb.annotation.NewWs
+import smartweb.annotation.RequestMethods
+import smartweb.annotation.WebAction
 import smartweb.controller.router.WebDynamicRouter
 import smartweb.controller.router.WebStaticRouter
+import smartweb.forEachFirstOrNull
+import smartweb.http.HttpMethod
+import smartweb.temple.TempleEngine
 import java.lang.reflect.Method
 
 class WebControllerLoader(
     @Config("smart.web.controller.contextValueKeys") val contextValueKeys: List<String> = emptyList(),
     context: DiContext,
     val templeEngines: List<TempleEngine> = arrayListOf()
-) : DssControllerLoader<WebActionContext, WebRouter, WebRootInfo, WebActionInvoker>(context) {
+) : DssControllerLoader<WebActionContext, WebRouter, WebRootInfo, WebActionInvoker, WebControllerProcessFlowInfo>(
+    context
+) {
 
     val rootInfoMap = HashMap<String, WebRootInfo>()
     val rootRouterMap = HashMap<String, WebRootRouter>()
 
     override fun findRootRouter(name: String): WebRootInfo =
         rootInfoMap.getOrPut(name) { WebRootInfo(WebStaticRouter(0)) }
+
+    override fun controllerInfo(
+        controllerClass: Class<*>,
+        controllerInstance: Any,
+        controllerChannels: List<String>,
+        controllerRouter: WebRouter
+    ): WebControllerProcessFlowInfo = WebControllerProcessFlowInfo(
+        controllerClass.annotation<ContextValues>()?.let { contextValueKeys + it.value } ?: contextValueKeys,
+        controllerClass,
+        controllerInstance,
+        controllerChannels,
+        controllerRouter
+    )
 
     override fun getSubStaticRouter(
         router: WebRouter,
@@ -98,6 +111,7 @@ class WebControllerLoader(
 
     override fun createActionInvoker(
         channels: List<String>,
+        controllerInfo: WebControllerProcessFlowInfo,
         actionClass: Class<*>,
         actionMethod: Method,
         instanceGetter: ControllerInstanceGetter,
@@ -111,7 +125,12 @@ class WebControllerLoader(
         "${actionClass.name.replace(".", "/")}/${actionMethod.name}.html".let { templePath ->
             templeEngines.forEachFirstOrNull { it.getTemple(templePath) }
         },
-        WebMethodInvoker(actionMethod, instanceGetter, contextValueKeys, actionRouter.pathVars).init(),
+        WebMethodInvoker(
+            actionMethod,
+            instanceGetter,
+            controllerInfo.controllerContextValueNames,
+            actionRouter.pathVars
+        ).init(),
         beforeProcesses,
         afterProcesses,
         catchProcesses
@@ -119,19 +138,11 @@ class WebControllerLoader(
 
 
     override fun createMethodInvoker(
+        controllerInfo: WebControllerProcessFlowInfo,
         controllerClass: Class<*>,
         targetMethod: Method,
         instanceGetter: ControllerInstanceGetter
-    ): ProcessInvoker<WebActionContext> =
-        WebMethodInvoker(targetMethod, instanceGetter, contextValueKeys).init()
-
-    override fun createCatchMethodInvoker(
-        throwableType: Class<out Throwable>,
-        controllerClass: Class<*>,
-        targetMethod: Method,
-        instanceGetter: ControllerInstanceGetter
-    ): ProcessInvoker<WebActionContext> =
-        SimpleCatchMethodInvoker(throwableType, WebMethodInvoker(targetMethod, instanceGetter, contextValueKeys).init())
+    ) = WebMethodInvoker(targetMethod, instanceGetter, controllerInfo.controllerContextValueNames).init()
 
 
     override fun postLoad() {
