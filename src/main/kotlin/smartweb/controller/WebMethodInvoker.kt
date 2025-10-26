@@ -193,7 +193,8 @@ open class WebMethodInvoker(
                     return {
 //                        if (this.saves.containsKey(it.name) || this.params.containsKey(it.name))
 
-                        readParam(it.name, type)
+                        if (isList) readParamArray(it.name)?.let { a -> if (isArray) a.toArray(type) else a.toList(type) }
+                        else readParam(it.name, type)
                             ?: if (fields.any { field -> this.params.containsKey(field) }) readBody(type)
                             else null
                     }
