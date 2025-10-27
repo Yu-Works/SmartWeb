@@ -166,17 +166,7 @@ open class WebMethodInvoker(
                             { readParamArray(it.name)?.toList(type) }
                         }
                     } else {
-                        if (it.type == String::class.java) {
-                            { readParam(it.name, type) }
-                        } else {
-                            val fields = it.type.allField.map { field -> field.name }.toSet().toList()
-                            return {
-                                val hasFiled = fields.any { field -> this.params.containsKey(field) }
-                                if (!hasFiled && (it.nullable || it.optional)) null
-                                else readBody(type)
-                            }
-                        }
-
+                        { readParam(it.name, type) }
                     }
                 }
 
@@ -188,7 +178,16 @@ open class WebMethodInvoker(
                             { readBodyArray()?.toList(type) }
                         }
                     } else {
-                        { readBody(type) }
+                        if (it.type == String::class.java) {
+                            { readParam(it.name, String::class.java) ?: readBody(type) }
+                        } else {
+                            val fields = it.type.allField.map { field -> field.name }.toSet().toList()
+                            return {
+                                val hasFiled = fields.any { field -> this.params.containsKey(field) }
+                                if (!hasFiled && (it.nullable || it.optional)) null
+                                else readBody(type)
+                            }
+                        }
                     }
                 }
 
