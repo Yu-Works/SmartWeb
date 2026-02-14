@@ -10,9 +10,11 @@ import com.alibaba.fastjson2.JSONArray
 import kotlinx.coroutines.CoroutineScope
 import rain.function.subStringByLast
 import smartweb.controller.WebActionContext.Companion.setUser
+import smartweb.toFileContentType
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
+import java.nio.file.Paths
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -124,7 +126,22 @@ abstract class InternalWebServer(
             if (path.startsWith("/asset/"))
                 this::class.java.classLoader
                     .getResource(path.substring(1))
-                    ?.let { result = File(it.file) }
+                    ?.takeIf { it.protocol == "file" || it.protocol == "jar" }
+                    ?.let {
+                        result = if (it.protocol == "file") File(it.file)
+                        else {
+                            it.openStream()
+                            val jarConn = it.openConnection() as java.net.JarURLConnection
+                            val entry = jarConn.jarEntry
+                            val fileName = Paths.get(entry.name).fileName.toString()
+                            DownloadFile(
+                                fileName,
+                                fileName.toFileContentType(),
+                                jarConn.getInputStream(),
+                                entry.size,
+                            )
+                        }
+                    }
             if (result == null) {
                 resp.status = 404
                 resp.write()
