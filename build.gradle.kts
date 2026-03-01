@@ -93,7 +93,7 @@ allprojects {
         implementation("com.IceCreamQAQ.Rain:event:$coreVersion")
         implementation("com.IceCreamQAQ.Rain:application:$coreVersion")
         implementation("com.IceCreamQAQ.Rain:controller:$coreVersion")
-        implementation("commons-fileupload:commons-fileupload:1.6")
+        implementation("commons-fileupload:commons-fileupload:1.6.0")
     }
 
 }
