@@ -100,5 +100,8 @@ allprojects {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    api("org.ehcache:ehcache:3.12.0")
+    api("org.ehcache:ehcache:3.12.0"){
+        exclude(group = "org.glassfish.jaxb", module = "jaxb-runtime")
+    }
+
 }
