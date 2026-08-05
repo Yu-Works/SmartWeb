@@ -100,5 +100,5 @@ allprojects {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    api("org.ehcache:ehcache:3.10.8")
+    api("org.ehcache:ehcache:3.12.0")
 }
