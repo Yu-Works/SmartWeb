@@ -14,6 +14,7 @@ import smartweb.toFileContentType
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
+import java.nio.charset.Charset
 import java.nio.file.Paths
 import java.util.*
 import kotlin.collections.HashMap
@@ -74,9 +75,15 @@ abstract class InternalWebServer(
 
         val origin = req.header("Origin")?.value
 
+        fun corsForbidden() {
+            resp.status = 403
+            resp.contentType = "application/json"
+            resp.write("{\"code\": \"CORS_ORIGIN_DENIED\",\"message\": \"Origin is not allowed\"}".toByteArray())
+        }
+
         if (origin != null && origin != "${req.scheme}://${req.host}") {
-            if (!cors) return
-            if (origin !in corsDomain) return
+            if (!cors) return corsForbidden()
+            if (origin !in corsDomain) return corsForbidden()
 
             resp.addHeader("Access-Control-Allow-Origin", origin)
             resp.addHeader("Access-Control-Allow-Headers", "*")
