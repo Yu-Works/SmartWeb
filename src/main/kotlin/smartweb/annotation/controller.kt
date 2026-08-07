@@ -3,8 +3,11 @@ package smartweb.annotation
 import smartweb.controller.WebControllerLoader
 import smartweb.http.HttpMethod
 import rain.api.annotation.LoadBy
+import rain.classloader.enchant.EnchantBy
+import rain.classloader.enchant.MethodParaNamedEnchanter
 
 @LoadBy(WebControllerLoader::class)
+@EnchantBy(MethodParaNamedEnchanter::class)
 annotation class WebController
 
 annotation class WebAction(
