@@ -98,12 +98,12 @@ class WebControllerLoader(
         }
         // 后续这里应该添加重复 Action 映射检测
         channels.forEach { method ->
-            when (HttpMethod.valueOf(method)) {
-                HttpMethod.GET -> mapping.getAction = actionInvoker
-                HttpMethod.POST -> mapping.postAction = actionInvoker
-                HttpMethod.PUT -> mapping.putAction = actionInvoker
-                HttpMethod.DELETE -> mapping.deleteAction = actionInvoker
-                HttpMethod.PATCH -> mapping.patchAction = actionInvoker
+            when (method) {
+                "GET" -> mapping.getAction = actionInvoker
+                "POST" -> mapping.postAction = actionInvoker
+                "PUT" -> mapping.putAction = actionInvoker
+                "DELETE" -> mapping.deleteAction = actionInvoker
+                "PATCH" -> mapping.patchAction = actionInvoker
                 else -> mapping.actionMap[method] = actionInvoker
             }
         }
