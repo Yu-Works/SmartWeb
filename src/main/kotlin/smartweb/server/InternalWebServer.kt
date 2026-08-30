@@ -185,7 +185,7 @@ abstract class InternalWebServer(
 
         fun statusCode(code: Int) {
             resp.status = code
-            resp.contentLength = 0
+            if (resp.contentLength < 0) resp.contentLength = 0
             resp.write()
         }
         if (result == null && resp.status == 200) {
