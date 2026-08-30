@@ -104,7 +104,7 @@ class SmartHTTPServer(config: WebServerConfig) : InternalWebServer(config) {
                             else TODO()
 
                         }
-                        "application/xml" -> TODO()
+//                        "application/xml" -> TODO()
                     }
                 }
 
