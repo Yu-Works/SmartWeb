@@ -15,6 +15,7 @@ import org.smartboot.http.server.HttpRequest
 import org.smartboot.http.server.HttpResponse
 import org.smartboot.http.server.HttpServerHandler
 import org.smartboot.http.server.handler.WebSocketRouteHandler
+import rain.api.event.EventBus
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.util.concurrent.CompletableFuture
@@ -23,7 +24,7 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 
-class SmartHTTPServer(config: WebServerConfig) : InternalWebServer(config) {
+class SmartHTTPServer(eventBus: EventBus?, config: WebServerConfig) : InternalWebServer(eventBus, config) {
 
     class SmartHttpScope(pool: CoroutineDispatcher) : CoroutineScope {
 
@@ -90,7 +91,7 @@ class SmartHTTPServer(config: WebServerConfig) : InternalWebServer(config) {
                             }
                         }
 
-                        if (uploadMap.isNotEmpty()){
+                        if (uploadMap.isNotEmpty()) {
                             req.uploadFiles = uploadMap
                         }
 
@@ -99,7 +100,7 @@ class SmartHTTPServer(config: WebServerConfig) : InternalWebServer(config) {
                     when (req.contentType) {
                         "application/json" -> {
                             val body = request.readBody(request.characterEncoding)
-                            if (body.startsWith("{") && body.endsWith("}") ) req.body = JSON.parseObject(body)
+                            if (body.startsWith("{") && body.endsWith("}")) req.body = JSON.parseObject(body)
                             else if (body.startsWith("[") && body.endsWith("]")) req.bodyArray = JSON.parseArray(body)
                             else TODO()
 

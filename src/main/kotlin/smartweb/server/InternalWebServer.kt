@@ -8,8 +8,10 @@ import smartweb.http.*
 import com.alibaba.fastjson2.JSON
 import com.alibaba.fastjson2.JSONArray
 import kotlinx.coroutines.CoroutineScope
+import rain.api.event.EventBus
 import rain.function.subStringByLast
 import smartweb.controller.WebActionContext.Companion.setUser
+import smartweb.event.Request404Event
 import smartweb.toFileContentType
 import java.io.File
 import java.io.FileInputStream
@@ -20,6 +22,7 @@ import java.util.*
 import kotlin.collections.HashMap
 
 abstract class InternalWebServer(
+    val eventBus: EventBus?,
     config: WebServerConfig
 ) : WebServer {
 
@@ -149,6 +152,8 @@ abstract class InternalWebServer(
                             )
                         }
                     }
+
+            eventBus?.post(Request404Event(context))
             if (result == null) {
                 resp.status = 404
                 resp.write()

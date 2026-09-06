@@ -9,6 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newFixedThreadPoolContext
+import rain.api.event.EventBus
 import smartweb.http.websocket.WsAction
 import smartweb.server.InternalWebServer
 import smartweb.server.WebServerConfig
@@ -16,7 +17,7 @@ import java.nio.ByteBuffer
 import java.nio.charset.Charset
 import kotlin.coroutines.CoroutineContext
 
-class UndertowServer(config: WebServerConfig) : InternalWebServer(config) {
+class UndertowServer(eventBus: EventBus?, config: WebServerConfig) : InternalWebServer(eventBus, config) {
     lateinit var undertow: Undertow
 
     override val pool: CoroutineScope = object : CoroutineScope {

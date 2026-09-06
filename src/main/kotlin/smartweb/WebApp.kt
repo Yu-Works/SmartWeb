@@ -7,6 +7,7 @@ import org.ehcache.config.builders.ExpiryPolicyBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import rain.api.di.DiContext
 import rain.api.di.DiContext.Companion.get
+import rain.api.event.EventBus
 import rain.api.loader.ApplicationService
 import rain.di.Config
 import rain.di.config.ConfigManager
@@ -96,8 +97,9 @@ class WebApp(
                     )
                     val impl = configManager.getConfig<String>("$configName.impl") ?: defaultImpl
 
-                    val serverImpl = Class.forName(impl).getConstructor(WebServerConfig::class.java)
-                        .newInstance(config) as InternalWebServer
+                    val serverImpl = Class.forName(impl)
+                        .getConstructor(EventBus::class.java, WebServerConfig::class.java)
+                        .newInstance(eventBus, config) as InternalWebServer
 
                     rootRouter.actions
                         .forEach {
