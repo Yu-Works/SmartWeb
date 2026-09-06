@@ -36,7 +36,8 @@ class Req(private val request: HttpRequest) : smartweb.http.Request {
     override var bodyArray: JSONArray? = null
     override var uploadFiles: Map<String, ArrayList<smartweb.http.UploadFile>>? = null
 
-    override val inputStream: InputStream? = null
+    override val inputStream: InputStream?
+        get() = request.inputStream
 
     override val userAgent: String
         get() = request.getHeader("User-Agent")
